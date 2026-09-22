@@ -278,7 +278,7 @@ export const vi = {
   },
   footer: {
     madeWith: 'Làm với 🏮 và rất nhiều bánh trung thu',
-    credits: '© {{year}} Quang Thieu. All rights reserved.',
+    credits: 'Pham Quang Thieu - Software Engineer · Backend · Cloud',
     copyright: '© {{year}} Đêm Trăng Rằm',
   },
   notFound: {

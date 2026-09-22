@@ -220,8 +220,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const getTime = useCallback(() => {
-    return ctxRef.current ? ctxRef.current.currentTime : performance.now() / 1000
-  }, [])
+    const ctx = getCtx()
+    return ctx ? ctx.currentTime : performance.now() / 1000
+  }, [getCtx])
 
   const noiseBuffer = useCallback((ctx: AudioContext) => {
     if (!noiseRef.current) {

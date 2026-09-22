@@ -280,7 +280,7 @@ export const en = {
   },
   footer: {
     madeWith: 'Made with 🏮 and far too many mooncakes',
-    credits: '© 2026 Quang Thieu. All rights reserved.',
+    credits: 'Pham Quang Thieu - Software Engineer · Backend · Cloud',
     copyright: '© {{year}} Moonlit Night',
   },
   notFound: {
