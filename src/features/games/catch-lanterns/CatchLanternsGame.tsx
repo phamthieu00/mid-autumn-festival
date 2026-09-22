@@ -3,7 +3,7 @@ import { Flame, Timer } from 'lucide-react'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { scoresStore } from '@/features/scores/scoresStore'
-import { Badge } from '@/components/ui/Badge'
+import { HudStat } from '../shared/HudStat'
 import { GameShell, type GameStatus } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
 import { useGameLoop } from '../shared/useGameLoop'
@@ -119,18 +119,17 @@ export default function CatchLanternsGame() {
         areaClassName="h-[min(70dvh,640px)] min-h-[420px]"
         hud={
           <>
-            <Badge className="text-sm">
-              <Timer className="size-4" /> {hud.time}s
-            </Badge>
+            <HudStat icon={Timer} value={`${hud.time}s`} />
             {hud.combo >= COMBO_THRESHOLD && (
-              <Badge className="animate-pop border-lantern-500/40 bg-lantern-500/15 text-lantern-300 text-sm">
-                <Flame className="size-4" /> x2 · {t('games.catch.combo')} {hud.combo}
-              </Badge>
+              <HudStat
+                icon={Flame}
+                accent="lantern"
+                pulse
+                label={`x2 · ${t('games.catch.combo')}`}
+                value={hud.combo}
+              />
             )}
-            <Badge className="text-sm">
-              {t('common.score')}:{' '}
-              <strong className="text-gold-300 tabular-nums">{hud.score}</strong>
-            </Badge>
+            <HudStat label={t('common.score')} value={hud.score} />
           </>
         }
       >

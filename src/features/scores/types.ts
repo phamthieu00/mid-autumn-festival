@@ -1,4 +1,4 @@
-export type GameId = 'catch' | 'match' | 'quiz'
+export type GameId = 'catch' | 'match' | 'quiz' | 'runner' | 'rhythm' | 'puzzle' | 'word'
 
 export interface HighScore {
   gameId: GameId

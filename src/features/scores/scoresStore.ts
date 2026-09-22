@@ -23,6 +23,10 @@ export const HIGHER_IS_BETTER: Record<GameId, boolean> = {
   catch: true,
   match: false,
   quiz: true,
+  runner: true,
+  rhythm: true,
+  puzzle: false,
+  word: true,
 }
 
 export function isBetter(gameId: GameId, candidate: HighScore, current?: HighScore): boolean {

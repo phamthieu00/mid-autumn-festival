@@ -2,7 +2,7 @@ import { useT } from '@/i18n'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { GameCard } from '@/features/games/shared/GameCard'
-import { GAMES } from '@/features/games/shared/registry'
+import { FEATURED_GAMES } from '@/features/games/shared/registry'
 
 export function GamesPreviewSection() {
   const { t } = useT()
@@ -14,7 +14,7 @@ export function GamesPreviewSection() {
         subtitle={t('home.gamesPreview.subtitle')}
       />
       <div className="grid gap-5 sm:grid-cols-3">
-        {GAMES.map((g, i) => (
+        {FEATURED_GAMES.map((g, i) => (
           <GameCard key={g.id} game={g} index={i} />
         ))}
       </div>

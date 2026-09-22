@@ -3,7 +3,7 @@ import { AnimatePresence } from 'motion/react'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { scoresStore } from '@/features/scores/scoresStore'
-import { Badge } from '@/components/ui/Badge'
+import { HudStat } from '../shared/HudStat'
 import { GameShell } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
 import { celebrate } from '../shared/celebrate'
@@ -72,12 +72,7 @@ export default function QuizGame() {
         status={shellStatus}
         onStart={start}
         areaClassName="min-h-[480px]"
-        hud={
-          <Badge className="text-sm">
-            {t('common.score')}:{' '}
-            <strong className="text-gold-300 tabular-nums">{state.score}</strong>/{total}
-          </Badge>
-        }
+        hud={<HudStat label={t('common.score')} value={`${state.score}/${total}`} />}
       >
         <AnimatePresence mode="wait">
           {state.status !== 'idle' && state.status !== 'finished' && (

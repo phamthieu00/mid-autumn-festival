@@ -45,6 +45,8 @@
   --animate-spin-slow: spin 40s linear infinite;
   --animate-pop: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-shimmer: shimmer 2.5s linear infinite;
+  --animate-eq: eq 1s ease-in-out infinite;
+  --animate-land-glow: land-glow 1.2s ease-out 2;
 
   @keyframes float {
     0%,
@@ -110,6 +112,23 @@
     100% {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+  @keyframes eq {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes land-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgb(255 209 102 / 0.7);
+    }
+    100% {
+      box-shadow: 0 0 0 18px rgb(255 209 102 / 0);
     }
   }
   @keyframes shimmer {

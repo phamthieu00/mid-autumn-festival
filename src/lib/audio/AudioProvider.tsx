@@ -8,9 +8,23 @@ import {
   type ReactNode,
 } from 'react'
 import { safeGet, safeSet } from '@/lib/storage'
+import { AmbientEngine } from './ambientEngine'
+import { probeBgmFile } from './bgmProbe'
 
 export type SfxName =
-  'catch' | 'golden' | 'miss' | 'flip' | 'match' | 'correct' | 'wrong' | 'win' | 'pop'
+  | 'catch'
+  | 'golden'
+  | 'miss'
+  | 'flip'
+  | 'match'
+  | 'correct'
+  | 'wrong'
+  | 'win'
+  | 'pop'
+  | 'drumLow'
+  | 'drumHigh'
+  | 'cymbal'
+  | 'jump'
 
 export interface AudioContextValue {
   musicOn: boolean
@@ -19,6 +33,10 @@ export interface AudioContextValue {
   toggleMusic: () => void
   toggleSfx: () => void
   playSfx: (name: SfxName) => void
+  /** Schedule a sound at an absolute AudioContext time (seconds). */
+  scheduleSfx: (name: SfxName, when: number) => void
+  /** AudioContext clock in seconds (falls back to performance.now()). */
+  getTime: () => number
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -26,7 +44,17 @@ export const AudioCtx = createContext<AudioContextValue | null>(null)
 
 const BGM_SRC = '/audio/bgm.mp3'
 
-type Note = { f: number; t: number; d: number; type?: OscillatorType; g?: number }
+type Note = {
+  f: number
+  t: number
+  d: number
+  type?: OscillatorType
+  g?: number
+  /** glide target frequency reached at the end of the note */
+  f2?: number
+  /** use filtered white noise instead of an oscillator (f = highpass cutoff) */
+  noise?: boolean
+}
 
 const SFX: Record<SfxName, Note[]> = {
   catch: [
@@ -66,14 +94,24 @@ const SFX: Record<SfxName, Note[]> = {
     { f: 440, t: 0, d: 0.05, type: 'triangle' },
     { f: 660, t: 0.04, d: 0.08, type: 'triangle' },
   ],
+  drumLow: [{ f: 160, f2: 55, t: 0, d: 0.28, type: 'sine', g: 0.5 }],
+  drumHigh: [
+    { f: 420, f2: 180, t: 0, d: 0.12, type: 'triangle', g: 0.35 },
+    { f: 3000, t: 0, d: 0.03, noise: true, g: 0.12 },
+  ],
+  cymbal: [{ f: 6000, t: 0, d: 0.35, noise: true, g: 0.22 }],
+  jump: [{ f: 500, f2: 900, t: 0, d: 0.12, type: 'triangle', g: 0.14 }],
 }
 
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [musicOn, setMusicOn] = useState<boolean>(() => safeGet('music', false))
   const [sfxOn, setSfxOn] = useState<boolean>(() => safeGet('sfx', true))
-  const [musicAvailable, setMusicAvailable] = useState(true)
-  const bgmRef = useRef<HTMLAudioElement | null>(null)
   const ctxRef = useRef<AudioContext | null>(null)
+  const engineRef = useRef<AmbientEngine | null>(null)
+  const bgmRef = useRef<HTMLAudioElement | null>(null)
+  const bgmFileRef = useRef<boolean | null>(null)
+  const noiseRef = useRef<AudioBuffer | null>(null)
+  const musicOnRef = useRef(musicOn)
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) {
@@ -87,64 +125,91 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     return ctxRef.current
   }, [])
 
-  const getBgm = useCallback(() => {
-    if (!bgmRef.current) {
-      const el = new Audio(BGM_SRC)
-      el.loop = true
-      el.volume = 0.35
-      el.preload = 'none'
-      el.addEventListener('error', () => {
-        setMusicAvailable(false)
-        setMusicOn(false)
-      })
-      bgmRef.current = el
-    }
-    return bgmRef.current
-  }, [])
+  const startEngine = useCallback(() => {
+    const ctx = getCtx()
+    if (!ctx) return
+    engineRef.current ??= new AmbientEngine({ volume: 0.25 })
+    engineRef.current.start(ctx)
+  }, [getCtx])
 
-  // Resume music after a user gesture if it was on last session.
-  useEffect(() => {
-    if (!musicOn) {
-      bgmRef.current?.pause()
+  const startMusic = useCallback(() => {
+    if (bgmFileRef.current) {
+      if (!bgmRef.current) {
+        const el = new Audio(BGM_SRC)
+        el.loop = true
+        el.volume = 0.35
+        el.addEventListener('error', () => {
+          bgmFileRef.current = false
+          if (musicOnRef.current) startEngine()
+        })
+        bgmRef.current = el
+      }
+      getCtx()
+      bgmRef.current.play().catch(() => {
+        /* waiting for a gesture */
+      })
       return
     }
-    const el = getBgm()
-    const tryPlay = () => {
-      el.play().catch(() => {
-        /* waiting for gesture */
-      })
+    startEngine()
+  }, [getCtx, startEngine])
+
+  const stopMusic = useCallback(() => {
+    bgmRef.current?.pause()
+    engineRef.current?.stop(1.5)
+  }, [])
+
+  // Probe the optional bgm file once; start music on the first gesture when it was on last session.
+  useEffect(() => {
+    let cancelled = false
+    probeBgmFile(BGM_SRC).then((ok) => {
+      if (!cancelled) bgmFileRef.current = ok
+    })
+    if (!musicOnRef.current) {
+      return () => {
+        cancelled = true
+      }
     }
-    tryPlay()
     const onGesture = () => {
-      tryPlay()
       window.removeEventListener('pointerdown', onGesture)
       window.removeEventListener('keydown', onGesture)
+      if (musicOnRef.current) startMusic()
     }
     window.addEventListener('pointerdown', onGesture)
     window.addEventListener('keydown', onGesture)
     return () => {
+      cancelled = true
       window.removeEventListener('pointerdown', onGesture)
       window.removeEventListener('keydown', onGesture)
     }
-  }, [musicOn, getBgm])
+  }, [startMusic])
 
+  // File playback pauses while hidden (the engine handles itself).
   useEffect(() => {
     const onVis = () => {
-      if (!bgmRef.current) return
-      if (document.hidden) bgmRef.current.pause()
-      else if (musicOn) bgmRef.current.play().catch(() => {})
+      const el = bgmRef.current
+      if (!el) return
+      if (document.hidden) el.pause()
+      else if (musicOnRef.current) el.play().catch(() => {})
     }
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
-  }, [musicOn])
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      engineRef.current?.stop(0)
+      bgmRef.current?.pause()
+    }
+  }, [])
 
   const toggleMusic = useCallback(() => {
-    setMusicOn((prev) => {
-      const next = !prev
-      safeSet('music', next)
-      return next
-    })
-  }, [])
+    const next = !musicOnRef.current
+    musicOnRef.current = next
+    setMusicOn(next)
+    safeSet('music', next)
+    if (next) startMusic()
+    else stopMusic()
+  }, [startMusic, stopMusic])
 
   const toggleSfx = useCallback(() => {
     setSfxOn((prev) => {
@@ -154,32 +219,75 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const playSfx = useCallback(
-    (name: SfxName) => {
+  const getTime = useCallback(() => {
+    return ctxRef.current ? ctxRef.current.currentTime : performance.now() / 1000
+  }, [])
+
+  const noiseBuffer = useCallback((ctx: AudioContext) => {
+    if (!noiseRef.current) {
+      const len = Math.floor(ctx.sampleRate * 0.5)
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate)
+      const data = buf.getChannelData(0)
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1
+      noiseRef.current = buf
+    }
+    return noiseRef.current
+  }, [])
+
+  const scheduleSfx = useCallback(
+    (name: SfxName, when: number) => {
       if (!sfxOn) return
       const ctx = getCtx()
       if (!ctx) return
-      const now = ctx.currentTime
+      const base = Math.max(when, ctx.currentTime)
       for (const n of SFX[name]) {
-        const osc = ctx.createOscillator()
+        const start = base + n.t
         const gain = ctx.createGain()
-        osc.type = n.type ?? 'sine'
-        osc.frequency.setValueAtTime(n.f, now + n.t)
         const g = n.g ?? 0.18
-        gain.gain.setValueAtTime(0.0001, now + n.t)
-        gain.gain.exponentialRampToValueAtTime(g, now + n.t + 0.01)
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d)
-        osc.connect(gain).connect(ctx.destination)
-        osc.start(now + n.t)
-        osc.stop(now + n.t + n.d + 0.02)
+        gain.gain.setValueAtTime(0.0001, start)
+        gain.gain.exponentialRampToValueAtTime(g, start + 0.01)
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + n.d)
+        gain.connect(ctx.destination)
+        if (n.noise) {
+          const src = ctx.createBufferSource()
+          src.buffer = noiseBuffer(ctx)
+          const hp = ctx.createBiquadFilter()
+          hp.type = 'highpass'
+          hp.frequency.value = n.f
+          src.connect(hp).connect(gain)
+          src.start(start)
+          src.stop(start + n.d + 0.02)
+        } else {
+          const osc = ctx.createOscillator()
+          osc.type = n.type ?? 'sine'
+          osc.frequency.setValueAtTime(n.f, start)
+          if (n.f2) osc.frequency.exponentialRampToValueAtTime(n.f2, start + n.d)
+          osc.connect(gain)
+          osc.start(start)
+          osc.stop(start + n.d + 0.02)
+        }
       }
     },
-    [sfxOn, getCtx],
+    [sfxOn, getCtx, noiseBuffer],
   )
 
-  const value = useMemo(
-    () => ({ musicOn, musicAvailable, sfxOn, toggleMusic, toggleSfx, playSfx }),
-    [musicOn, musicAvailable, sfxOn, toggleMusic, toggleSfx, playSfx],
+  const playSfx = useCallback(
+    (name: SfxName) => scheduleSfx(name, getTime()),
+    [scheduleSfx, getTime],
+  )
+
+  const value = useMemo<AudioContextValue>(
+    () => ({
+      musicOn,
+      musicAvailable: true,
+      sfxOn,
+      toggleMusic,
+      toggleSfx,
+      playSfx,
+      scheduleSfx,
+      getTime,
+    }),
+    [musicOn, sfxOn, toggleMusic, toggleSfx, playSfx, scheduleSfx, getTime],
   )
 
   return <AudioCtx.Provider value={value}>{children}</AudioCtx.Provider>

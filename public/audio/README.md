@@ -1,5 +1,8 @@
 # Background music
 
-Drop a CC0 / royalty-free loop here as `bgm.mp3` (e.g. from Pixabay or OpenGameArt) and the
-music toggle in the header will pick it up automatically. When the file is missing the toggle
-hides itself. Sound effects are synthesised with the Web Audio API and need no files.
+The site plays **generative ambient music** synthesised in the browser with the Web Audio API
+(slow pentatonic plucks over a soft pad, no files needed).
+
+If you prefer a recorded track, drop a CC0 / royalty-free loop here as `bgm.mp3`. The music
+toggle probes this file on load and will play it instead of the generative engine.
+Sound effects are always synthesised and need no files.

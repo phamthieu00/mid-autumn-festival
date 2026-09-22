@@ -29,6 +29,14 @@ describe('scoresStore', () => {
     expect(isBetter('quiz', { ...cur, secondary: 60 }, cur)).toBe(false)
   })
 
+  it('puzzle is lower-is-better with time tie-break', () => {
+    expect(scoresStore.submit('puzzle', 40, 120)).toBe(true)
+    expect(scoresStore.submit('puzzle', 45, 30)).toBe(false)
+    expect(scoresStore.submit('puzzle', 40, 90)).toBe(true)
+    expect(scoresStore.submit('puzzle', 32, 200)).toBe(true)
+    expect(scoresStore.getBest('puzzle')).toMatchObject({ value: 32, secondary: 200 })
+  })
+
   it('persists to localStorage with version', () => {
     scoresStore.submit('quiz', 7)
     const raw = JSON.parse(localStorage.getItem('maf:highscores') ?? '{}')

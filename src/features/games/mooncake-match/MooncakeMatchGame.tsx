@@ -4,7 +4,7 @@ import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { formatTime } from '@/lib/format'
 import { scoresStore } from '@/features/scores/scoresStore'
-import { Badge } from '@/components/ui/Badge'
+import { HudStat } from '../shared/HudStat'
 import { GameShell } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
 import { useStopwatch } from '../shared/useStopwatch'
@@ -69,16 +69,12 @@ export default function MooncakeMatchGame() {
         areaClassName="p-3 sm:p-5"
         hud={
           <>
-            <Badge className="text-sm">
-              <Timer className="size-4" /> {formatTime(elapsed)}
-            </Badge>
-            <Badge className="text-sm">
-              {t('games.match.pairs')}: {state.matchedPairs}/{state.totalPairs}
-            </Badge>
-            <Badge className="text-sm">
-              {t('common.moves')}:{' '}
-              <strong className="text-gold-300 tabular-nums">{state.moves}</strong>
-            </Badge>
+            <HudStat icon={Timer} value={formatTime(elapsed)} />
+            <HudStat
+              label={t('games.match.pairs')}
+              value={`${state.matchedPairs}/${state.totalPairs}`}
+            />
+            <HudStat label={t('common.moves')} value={state.moves} />
           </>
         }
       >
