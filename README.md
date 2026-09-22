@@ -4,6 +4,8 @@ Website vui vẻ về Tết Trung Thu: đêm trăng huyền ảo, chuyện Chú 
 đếm ngược tới rằm tháng Tám, bảy mini-game, đố vui từ ngân hàng 1000+ câu hỏi, nhạc nền
 generative và bức tường đèn ước nguyện với hiệu ứng thả đèn 3D. Song ngữ Việt / Anh.
 
+**Demo:** https://mid-autumn-festival-murex.vercel.app
+
 ## Stack
 
 Vite 8 · React 19 · TypeScript · Tailwind CSS v4 · Motion · React Router 7 · Three.js · Vitest
