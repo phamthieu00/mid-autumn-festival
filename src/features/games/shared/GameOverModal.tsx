@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { RotateCcw, Trophy } from 'lucide-react'
 import { useT } from '@/i18n'
 import { Modal } from '@/components/ui/Modal'
@@ -18,6 +19,7 @@ export function GameOverModal({
   extra,
   onReplay,
   shareText,
+  children,
 }: {
   open: boolean
   game: GameMeta
@@ -30,6 +32,7 @@ export function GameOverModal({
   extra?: string
   onReplay: () => void
   shareText?: string
+  children?: ReactNode
 }) {
   const { t } = useT()
   return (
@@ -45,6 +48,7 @@ export function GameOverModal({
         {score} <span className="text-cream/70 text-2xl">{unit}</span>
       </p>
       {extra && <p className="text-cream/70 mt-1 text-sm">{extra}</p>}
+      {children}
       {isRecord ? (
         <p className="animate-pop bg-gold-500/15 text-gold-300 mt-3 inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-bold">
           <Trophy className="size-4" /> {t('common.newRecord')}

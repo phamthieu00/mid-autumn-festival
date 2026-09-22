@@ -42,7 +42,17 @@ export function QuestionCard({
     >
       <div className="text-lantern-400 mb-2 flex items-center justify-between text-xs font-semibold tracking-widest uppercase">
         <span>{t('games.quiz.question', { current: index + 1, total })}</span>
-        <span className="text-2xl">{question.emoji}</span>
+        <span className="flex items-center gap-2">
+          <span
+            className="text-gold-400 text-[10px] tracking-normal"
+            aria-label={t('games.quiz.difficulty', { level: question.difficulty })}
+            title={t('games.quiz.difficulty', { level: question.difficulty })}
+          >
+            {'★'.repeat(question.difficulty)}
+            <span className="text-cream/30">{'★'.repeat(3 - question.difficulty)}</span>
+          </span>
+          <span className="text-2xl">{question.emoji}</span>
+        </span>
       </div>
       <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10">
         <motion.div

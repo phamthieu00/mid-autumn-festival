@@ -9,15 +9,19 @@ import { GameOverModal } from '../shared/GameOverModal'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
 import {
-  buildOrders,
+  categoryBreakdown,
   correctDisplayIndex,
+  currentQuestion,
   initialQuizState,
   quizReducer,
   rankFor,
+  startQuiz,
 } from './quizReducer'
-import { QUESTIONS } from './questions'
 import { QuestionCard } from './QuestionCard'
-import type { QuizAction, QuizState } from './types'
+import { Badge } from '@/components/ui/Badge'
+import { CATEGORY_EMOJI } from './bank'
+import { categoryKey } from './categoryKey'
+import { QUIZ_SIZE, type QuizAction, type QuizState } from './types'
 
 const GAME = gameById('quiz')
 
@@ -32,7 +36,7 @@ export default function QuizGame() {
 
   const start = () => {
     setResult(null)
-    dispatch({ type: 'START', ...buildOrders(), now: Date.now() })
+    dispatch(startQuiz())
   }
 
   const answer = (index: number) => {
@@ -59,7 +63,7 @@ export default function QuizGame() {
     }
   }
 
-  const total = QUESTIONS.length
+  const total = state.questions.length || QUIZ_SIZE
   const rank = rankFor(state.score, total)
   const rankTitle = t(`games.quiz.rank${rank}`)
   const shellStatus =
@@ -78,7 +82,7 @@ export default function QuizGame() {
           {state.status !== 'idle' && state.status !== 'finished' && (
             <QuestionCard
               key={state.current}
-              question={QUESTIONS[state.order[state.current]]}
+              question={currentQuestion(state)}
               optionOrder={state.optionOrders[state.current]}
               index={state.current}
               total={total}
@@ -105,7 +109,21 @@ export default function QuizGame() {
         extra={t(`games.quiz.rank${rank}Desc`)}
         onReplay={start}
         shareText={t('games.quiz.shareText', { score: state.score, total, rank: rankTitle })}
-      />
+      >
+        {state.status === 'finished' && (
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {categoryBreakdown(state).map((c) => (
+              <Badge
+                key={c.category}
+                className={c.correct === c.total ? 'border-jade/40 text-jade' : ''}
+              >
+                {CATEGORY_EMOJI[c.category as keyof typeof CATEGORY_EMOJI]}{' '}
+                {t(categoryKey(c.category as never))} {c.correct}/{c.total}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </GameOverModal>
     </>
   )
 }
