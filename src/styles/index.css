@@ -1,0 +1,199 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-night-950: #070a1a;
+  --color-night-900: #0b1026;
+  --color-night-800: #141b3d;
+  --color-night-700: #1f2a5c;
+  --color-night-600: #2c3a7a;
+
+  --color-moon-100: #fff8dc;
+  --color-moon-300: #ffe9a8;
+  --color-moon-500: #ffd166;
+
+  --color-gold-300: #f8d98a;
+  --color-gold-400: #f4c15d;
+  --color-gold-500: #e0a52a;
+  --color-gold-600: #b8860b;
+
+  --color-lantern-300: #ffb072;
+  --color-lantern-400: #ff8c42;
+  --color-lantern-500: #ff6b35;
+  --color-lantern-600: #e63946;
+  --color-lantern-700: #b3202e;
+
+  --color-cream: #fdf6e3;
+  --color-jade: #7ed6a5;
+  --color-blush: #ff8fb1;
+
+  --font-display: 'Pacifico', 'Be Vietnam Pro', cursive;
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-moon:
+    0 0 60px 20px rgb(255 209 102 / 0.45), 0 0 140px 60px rgb(255 209 102 / 0.2);
+  --shadow-lantern: 0 0 24px 6px rgb(255 107 53 / 0.55);
+  --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.35);
+  --shadow-gold-sm: 0 0 12px 2px rgb(244 193 93 / 0.45);
+
+  --radius-4xl: 2rem;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+  --animate-rise: rise 18s linear infinite;
+  --animate-twinkle: twinkle 3s ease-in-out infinite;
+  --animate-glow: glow 4s ease-in-out infinite;
+  --animate-sway: sway 5s ease-in-out infinite;
+  --animate-spin-slow: spin 40s linear infinite;
+  --animate-pop: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes rise {
+    0% {
+      transform: translateY(110vh) scale(0.8);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-20vh) scale(1.05);
+      opacity: 0;
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes glow {
+    0%,
+    100% {
+      box-shadow:
+        0 0 60px 20px rgb(255 209 102 / 0.45),
+        0 0 140px 60px rgb(255 209 102 / 0.2);
+    }
+    50% {
+      box-shadow:
+        0 0 80px 30px rgb(255 209 102 / 0.6),
+        0 0 180px 80px rgb(255 209 102 / 0.25);
+    }
+  }
+  @keyframes sway {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-night-900 font-sans text-cream antialiased;
+    background-image: radial-gradient(
+      ellipse at 50% -10%,
+      var(--color-night-600) 0%,
+      var(--color-night-800) 35%,
+      var(--color-night-900) 65%,
+      var(--color-night-950) 100%
+    );
+    background-attachment: fixed;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: var(--color-gold-500);
+    color: var(--color-night-950);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold-400);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-night-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-night-600);
+    border-radius: 999px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility text-glow {
+  text-shadow:
+    0 0 12px rgb(255 209 102 / 0.6),
+    0 0 32px rgb(255 209 102 / 0.3);
+}
+
+@utility text-glow-lantern {
+  text-shadow:
+    0 0 12px rgb(255 107 53 / 0.7),
+    0 0 32px rgb(255 107 53 / 0.35);
+}
+
+@utility glass {
+  background: rgb(255 255 255 / 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgb(244 193 93 / 0.18);
+  box-shadow: var(--shadow-glass);
+}
+
+@utility flip-card {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
