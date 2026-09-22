@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { LanternIcon } from '@/components/ui/LanternIcon'
@@ -7,35 +7,45 @@ import { useToast } from '@/components/ui/Toast'
 import { useAudio } from '@/hooks/useAudio'
 import { useT } from '@/i18n'
 import { cn } from '@/lib/cn'
+import { prefetchLanternRelease } from './prefetchLanternRelease'
 import { wishesStore } from './wishesStore'
 import { WISH_NAME_MAX, WISH_TEXT_MAX, type Wish } from './types'
 
 const COLORS = Object.keys(LANTERN_COLORS) as LanternColor[]
 
-export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) {
+export function WishForm({
+  onReleased,
+  disabled = false,
+}: {
+  onReleased?: (wish: Wish, origin: { x: number; y: number }) => void
+  disabled?: boolean
+}) {
   const { t } = useT()
   const { toast } = useToast()
   const { playSfx } = useAudio()
   const [text, setText] = useState('')
   const [name, setName] = useState('')
   const [color, setColor] = useState<LanternColor>('red')
+  const submitRef = useRef<HTMLButtonElement>(null)
 
   const remaining = WISH_TEXT_MAX - text.length
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
+    if (disabled) return
     const res = wishesStore.add({ text, name, color })
     if (!res.ok) {
       if (res.reason === 'tooLong') toast(t('wishes.tooLong', { max: WISH_TEXT_MAX }), 'warn')
       return
     }
-    playSfx('pop')
+    playSfx('flip')
     setText('')
-    toast(
-      res.persisted ? t('wishes.saved') : t('wishes.storageWarn'),
-      res.persisted ? 'success' : 'warn',
-    )
-    onReleased?.(res.wish)
+    if (!res.persisted) toast(t('wishes.storageWarn'), 'warn')
+    const rect = submitRef.current?.getBoundingClientRect()
+    const origin = rect
+      ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+      : { x: window.innerWidth / 2, y: window.innerHeight * 0.7 }
+    onReleased?.(res.wish, origin)
   }
 
   return (
@@ -56,6 +66,7 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value.slice(0, WISH_TEXT_MAX))}
+              onFocus={prefetchLanternRelease}
               placeholder={t('wishes.placeholder')}
               rows={3}
               maxLength={WISH_TEXT_MAX}
@@ -97,9 +108,9 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
             />
           ))}
         </div>
-        <Button type="submit" disabled={!text.trim()}>
+        <Button ref={submitRef} type="submit" disabled={!text.trim() || disabled}>
           <Send className="size-4" />
-          {t('wishes.send')}
+          {disabled ? t('wishes.releasing') : t('wishes.send')}
         </Button>
       </div>
     </form>
