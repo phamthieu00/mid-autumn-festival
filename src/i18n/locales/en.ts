@@ -283,7 +283,7 @@ export const en = {
     releasing: 'Lantern rising...',
   },
   footer: {
-    madeWith: 'Made with 🏮 and far too many mooncakes',
+    madeWith: 'Made with Pham Thieu 🏮 and far too many mooncakes',
     credits: 'Pham Quang Thieu - Software Engineer · Backend · Cloud',
     copyright: '© {{year}} Moonlit Night',
   },

@@ -281,7 +281,7 @@ export const vi = {
     releasing: 'Đèn đang bay lên...',
   },
   footer: {
-    madeWith: 'Làm với 🏮 và rất nhiều bánh trung thu',
+    madeWith: 'Làm với Pham Thieu 🏮 và rất nhiều bánh trung thu',
     credits: 'Pham Quang Thieu - Software Engineer · Backend · Cloud',
     copyright: '© {{year}} Đêm Trăng Rằm',
   },
