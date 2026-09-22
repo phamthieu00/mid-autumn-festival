@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildOrders, correctDisplayIndex, initialQuizState, quizReducer, rankFor } from './quizReducer'
+import {
+  buildOrders,
+  correctDisplayIndex,
+  initialQuizState,
+  quizReducer,
+  rankFor,
+} from './quizReducer'
 import { QUESTIONS } from './questions'
 import { seededRng } from '@/lib/random'
 

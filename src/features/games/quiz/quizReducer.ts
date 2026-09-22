@@ -14,8 +14,16 @@ export const initialQuizState: QuizState = {
 }
 
 export function buildOrders(rng: () => number = Math.random, questions = QUESTIONS) {
-  const order = shuffle(questions.map((_, i) => i), rng)
-  const optionOrders = order.map((qi) => shuffle(questions[qi].options.map((_, i) => i), rng))
+  const order = shuffle(
+    questions.map((_, i) => i),
+    rng,
+  )
+  const optionOrders = order.map((qi) =>
+    shuffle(
+      questions[qi].options.map((_, i) => i),
+      rng,
+    ),
+  )
   return { order, optionOrders }
 }
 
@@ -25,7 +33,11 @@ export function correctDisplayIndex(state: QuizState, questions = QUESTIONS): nu
   return state.optionOrders[state.current].indexOf(questions[qi].correctIndex)
 }
 
-export function quizReducer(state: QuizState, action: QuizAction, questions = QUESTIONS): QuizState {
+export function quizReducer(
+  state: QuizState,
+  action: QuizAction,
+  questions = QUESTIONS,
+): QuizState {
   switch (action.type) {
     case 'START':
       return {
@@ -40,7 +52,12 @@ export function quizReducer(state: QuizState, action: QuizAction, questions = QU
     case 'ANSWER': {
       if (state.status !== 'answering') return state
       const correct = correctDisplayIndex(state, questions) === action.index
-      return { ...state, status: 'revealed', selected: action.index, score: state.score + (correct ? 1 : 0) }
+      return {
+        ...state,
+        status: 'revealed',
+        selected: action.index,
+        score: state.score + (correct ? 1 : 0),
+      }
     }
     case 'NEXT': {
       if (state.status !== 'revealed') return state

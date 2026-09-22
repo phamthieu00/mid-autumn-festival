@@ -6,7 +6,15 @@ import { useHighScores } from '@/features/scores/useHighScores'
 import { Badge } from '@/components/ui/Badge'
 import type { GameMeta } from './registry'
 
-export function GameCard({ game, index = 0, showBest = false }: { game: GameMeta; index?: number; showBest?: boolean }) {
+export function GameCard({
+  game,
+  index = 0,
+  showBest = false,
+}: {
+  game: GameMeta
+  index?: number
+  showBest?: boolean
+}) {
   const { t } = useT()
   const scores = useHighScores()
   const best = scores[game.id]
@@ -21,7 +29,7 @@ export function GameCard({ game, index = 0, showBest = false }: { game: GameMeta
     >
       <Link
         to={game.path}
-        className="glass group flex h-full flex-col overflow-hidden rounded-3xl transition hover:border-gold-400/50"
+        className="glass group hover:border-gold-400/50 flex h-full flex-col overflow-hidden rounded-3xl transition"
       >
         <div
           className={`relative flex h-36 items-center justify-center bg-gradient-to-br ${game.gradient} text-6xl`}
@@ -36,12 +44,14 @@ export function GameCard({ game, index = 0, showBest = false }: { game: GameMeta
           )}
         </div>
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="font-display text-2xl text-moon-500">{t(game.titleKey)}</h3>
-          <p className="mt-2 flex-1 text-sm text-cream/70">{t(game.descKey)}</p>
+          <h3 className="font-display text-moon-500 text-2xl">{t(game.titleKey)}</h3>
+          <p className="text-cream/70 mt-2 flex-1 text-sm">{t(game.descKey)}</p>
           <div className="mt-4 flex items-center justify-between text-sm">
-            <span className="font-semibold text-gold-300 group-hover:underline">{t('common.playNow')} →</span>
+            <span className="text-gold-300 font-semibold group-hover:underline">
+              {t('common.playNow')} →
+            </span>
             {showBest && (
-              <span className="text-xs text-cream/50">
+              <span className="text-cream/50 text-xs">
                 {t('games.hub.bestLabel')}: {best ? `${best.value}` : t('common.noRecord')}
               </span>
             )}

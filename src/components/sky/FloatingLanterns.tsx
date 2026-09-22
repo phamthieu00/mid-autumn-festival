@@ -1,6 +1,12 @@
 import { LanternIcon, type LanternColor } from '@/components/ui/LanternIcon'
 
-const LANTERNS: { left: string; delay: number; duration: number; size: number; color: LanternColor }[] = [
+const LANTERNS: {
+  left: string
+  delay: number
+  duration: number
+  size: number
+  color: LanternColor
+}[] = [
   { left: '6%', delay: 0, duration: 22, size: 34, color: 'red' },
   { left: '18%', delay: -7, duration: 26, size: 26, color: 'orange' },
   { left: '31%', delay: -14, duration: 24, size: 40, color: 'gold' },
@@ -18,10 +24,17 @@ export function FloatingLanterns() {
         <div
           key={i}
           className="animate-rise absolute bottom-0 will-change-transform"
-          style={{ left: l.left, animationDelay: `${l.delay}s`, animationDuration: `${l.duration}s` }}
+          style={{
+            left: l.left,
+            animationDelay: `${l.delay}s`,
+            animationDuration: `${l.duration}s`,
+          }}
         >
           <div className="animate-sway" style={{ animationDelay: `${i * 0.7}s` }}>
-            <LanternIcon color={l.color} style={{ width: l.size, height: l.size * 1.56, opacity: 0.85 }} />
+            <LanternIcon
+              color={l.color}
+              style={{ width: l.size, height: l.size * 1.56, opacity: 0.85 }}
+            />
           </div>
         </div>
       ))}

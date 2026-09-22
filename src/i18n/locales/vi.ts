@@ -164,7 +164,8 @@ export const vi = {
       rank2Desc: 'Khá lắm! Bạn nắm được hầu hết chuyện Trung Thu.',
       rank3: 'Hằng Nga uyên bác',
       rank3Desc: 'Xuất sắc! Bạn là bậc thầy về Tết Trung Thu.',
-      shareText: 'Mình đạt {{score}}/{{total}} trong Đố vui Trung Thu và nhận danh hiệu "{{rank}}" 🌕 Bạn thử nhé!',
+      shareText:
+        'Mình đạt {{score}}/{{total}} trong Đố vui Trung Thu và nhận danh hiệu "{{rank}}" 🌕 Bạn thử nhé!',
     },
   },
   wishes: {

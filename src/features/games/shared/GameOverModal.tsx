@@ -35,21 +35,23 @@ export function GameOverModal({
   return (
     <Modal open={open} onClose={onReplay} dismissible={false} className="text-center">
       <div className="text-6xl">{isRecord ? '🏆' : game.emoji}</div>
-      <h2 className="font-display text-glow mt-3 text-3xl text-moon-500">
+      <h2 className="font-display text-glow text-moon-500 mt-3 text-3xl">
         {title ?? (isRecord ? t('games.shared.wellDone') : t('games.shared.gameOver'))}
       </h2>
-      <p className="mt-4 text-sm tracking-widest text-cream/60 uppercase">{scoreLabel ?? t('games.shared.yourScore')}</p>
-      <p className="font-display text-glow text-6xl text-gold-400 tabular-nums">
-        {score} <span className="text-2xl text-cream/70">{unit}</span>
+      <p className="text-cream/60 mt-4 text-sm tracking-widest uppercase">
+        {scoreLabel ?? t('games.shared.yourScore')}
       </p>
-      {extra && <p className="mt-1 text-sm text-cream/70">{extra}</p>}
+      <p className="font-display text-glow text-gold-400 text-6xl tabular-nums">
+        {score} <span className="text-cream/70 text-2xl">{unit}</span>
+      </p>
+      {extra && <p className="text-cream/70 mt-1 text-sm">{extra}</p>}
       {isRecord ? (
-        <p className="animate-pop mt-3 inline-flex items-center gap-1 rounded-full bg-gold-500/15 px-4 py-1.5 text-sm font-bold text-gold-300">
+        <p className="animate-pop bg-gold-500/15 text-gold-300 mt-3 inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-bold">
           <Trophy className="size-4" /> {t('common.newRecord')}
         </p>
       ) : (
         previousBest != null && (
-          <p className="mt-3 text-sm text-cream/60">
+          <p className="text-cream/60 mt-3 text-sm">
             {t('games.shared.previousBest')}: {previousBest} {unit}
           </p>
         )
@@ -61,7 +63,10 @@ export function GameOverModal({
         </Button>
         <ShareButton
           size="lg"
-          text={shareText ?? t('games.shared.shareText', { score: `${score} ${unit}`, game: t(game.titleKey) })}
+          text={
+            shareText ??
+            t('games.shared.shareText', { score: `${score} ${unit}`, game: t(game.titleKey) })
+          }
         />
         <LinkButton to="/games" variant="ghost" size="lg">
           {t('common.backToHub')}

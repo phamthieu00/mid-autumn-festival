@@ -29,8 +29,7 @@
   --font-display: 'Pacifico', 'Be Vietnam Pro', cursive;
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-moon:
-    0 0 60px 20px rgb(255 209 102 / 0.45), 0 0 140px 60px rgb(255 209 102 / 0.2);
+  --shadow-moon: 0 0 60px 20px rgb(255 209 102 / 0.45), 0 0 140px 60px rgb(255 209 102 / 0.2);
   --shadow-lantern: 0 0 24px 6px rgb(255 107 53 / 0.55);
   --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.35);
   --shadow-gold-sm: 0 0 12px 2px rgb(244 193 93 / 0.45);
@@ -129,7 +128,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-night-900 font-sans text-cream antialiased;
+    @apply bg-night-900 text-cream font-sans antialiased;
     background-image: radial-gradient(
       ellipse at 50% -10%,
       var(--color-night-600) 0%,

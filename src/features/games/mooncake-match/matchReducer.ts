@@ -4,7 +4,12 @@ import type { MatchAction, MatchState, MemoryCard } from './types'
 
 export function createDeck(rng: () => number = Math.random): MemoryCard[] {
   const ids = FLAVORS.flatMap((f) => [f.id, f.id])
-  return shuffle(ids, rng).map((flavorId, i) => ({ id: i, flavorId, isFlipped: false, isMatched: false }))
+  return shuffle(ids, rng).map((flavorId, i) => ({
+    id: i,
+    flavorId,
+    isFlipped: false,
+    isMatched: false,
+  }))
 }
 
 export const initialMatchState: MatchState = {
@@ -62,7 +67,9 @@ export function matchReducer(state: MatchState, action: MatchAction): MatchState
     }
     case 'RESOLVE': {
       if (state.status !== 'checking') return state
-      const cards = state.cards.map((c) => (state.flipped.includes(c.id) ? { ...c, isFlipped: false } : c))
+      const cards = state.cards.map((c) =>
+        state.flipped.includes(c.id) ? { ...c, isFlipped: false } : c,
+      )
       return { ...state, cards, flipped: [], status: 'running' }
     }
     default:

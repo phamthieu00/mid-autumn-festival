@@ -26,7 +26,12 @@ export default function CatchLanternsGame() {
 
   const [status, setStatus] = useState<GameStatus>('idle')
   const [hud, setHud] = useState({ score: 0, combo: 0, time: 60 })
-  const [result, setResult] = useState<{ score: number; isRecord: boolean; prev?: number; maxCombo: number } | null>(null)
+  const [result, setResult] = useState<{
+    score: number
+    isRecord: boolean
+    prev?: number
+    maxCombo: number
+  } | null>(null)
 
   // canvas sizing
   useEffect(() => {
@@ -118,17 +123,21 @@ export default function CatchLanternsGame() {
               <Timer className="size-4" /> {hud.time}s
             </Badge>
             {hud.combo >= COMBO_THRESHOLD && (
-              <Badge className="animate-pop border-lantern-500/40 bg-lantern-500/15 text-sm text-lantern-300">
+              <Badge className="animate-pop border-lantern-500/40 bg-lantern-500/15 text-lantern-300 text-sm">
                 <Flame className="size-4" /> x2 · {t('games.catch.combo')} {hud.combo}
               </Badge>
             )}
             <Badge className="text-sm">
-              {t('common.score')}: <strong className="text-gold-300 tabular-nums">{hud.score}</strong>
+              {t('common.score')}:{' '}
+              <strong className="text-gold-300 tabular-nums">{hud.score}</strong>
             </Badge>
           </>
         }
       >
-        <div ref={wrapRef} className="absolute inset-0 bg-gradient-to-b from-night-800/30 to-night-950/60">
+        <div
+          ref={wrapRef}
+          className="from-night-800/30 to-night-950/60 absolute inset-0 bg-gradient-to-b"
+        >
           <canvas
             ref={canvasRef}
             onPointerDown={onPointerDown}

@@ -24,7 +24,13 @@ function readInitialLang(): Lang {
   return stored === 'en' ? 'en' : 'vi'
 }
 
-export function I18nProvider({ children, initialLang }: { children: ReactNode; initialLang?: Lang }) {
+export function I18nProvider({
+  children,
+  initialLang,
+}: {
+  children: ReactNode
+  initialLang?: Lang
+}) {
   const [lang, setLangState] = useState<Lang>(() => initialLang ?? readInitialLang())
 
   useEffect(() => {
@@ -52,7 +58,10 @@ export function I18nProvider({ children, initialLang }: { children: ReactNode; i
 
   const tx = useCallback((text: LocalizedText) => text[lang] ?? text.vi, [lang])
 
-  const value = useMemo(() => ({ lang, setLang, toggleLang, t, tx }), [lang, setLang, toggleLang, t, tx])
+  const value = useMemo(
+    () => ({ lang, setLang, toggleLang, t, tx }),
+    [lang, setLang, toggleLang, t, tx],
+  )
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }

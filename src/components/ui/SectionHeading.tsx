@@ -15,12 +15,18 @@ export function SectionHeading({
   className?: string
 }) {
   return (
-    <div className={cn('mb-10 space-y-3', align === 'center' ? 'text-center' : 'text-left', className)}>
+    <div
+      className={cn('mb-10 space-y-3', align === 'center' ? 'text-center' : 'text-left', className)}
+    >
       {eyebrow && (
-        <p className="text-sm font-semibold tracking-[0.2em] text-lantern-400 uppercase">{eyebrow}</p>
+        <p className="text-lantern-400 text-sm font-semibold tracking-[0.2em] uppercase">
+          {eyebrow}
+        </p>
       )}
-      <h2 className="font-display text-glow text-4xl text-moon-500 sm:text-5xl">{title}</h2>
-      {subtitle && <p className="mx-auto max-w-2xl text-base text-cream/70 sm:text-lg">{subtitle}</p>}
+      <h2 className="font-display text-glow text-moon-500 text-4xl sm:text-5xl">{title}</h2>
+      {subtitle && (
+        <p className="text-cream/70 mx-auto max-w-2xl text-base sm:text-lg">{subtitle}</p>
+      )}
     </div>
   )
 }

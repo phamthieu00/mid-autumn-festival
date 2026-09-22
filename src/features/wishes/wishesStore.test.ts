@@ -10,7 +10,10 @@ describe('wishesStore', () => {
 
   it('rejects empty and too long wishes', () => {
     expect(wishesStore.add({ text: '   ', color: 'red' })).toEqual({ ok: false, reason: 'empty' })
-    expect(wishesStore.add({ text: 'a'.repeat(121), color: 'red' })).toEqual({ ok: false, reason: 'tooLong' })
+    expect(wishesStore.add({ text: 'a'.repeat(121), color: 'red' })).toEqual({
+      ok: false,
+      reason: 'tooLong',
+    })
   })
 
   it('adds, trims and persists', () => {

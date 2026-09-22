@@ -166,7 +166,8 @@ export const en = {
       rank2Desc: 'Nice! You know most of the Mid-Autumn stories.',
       rank3: 'Wise Hằng Nga',
       rank3Desc: 'Outstanding! You are a true Mid-Autumn master.',
-      shareText: 'I scored {{score}}/{{total}} in Mid-Autumn Trivia and earned the title "{{rank}}" 🌕 Try it!',
+      shareText:
+        'I scored {{score}}/{{total}} in Mid-Autumn Trivia and earned the title "{{rank}}" 🌕 Try it!',
     },
   },
   wishes: {

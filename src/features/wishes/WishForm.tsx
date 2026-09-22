@@ -31,7 +31,10 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
     }
     playSfx('pop')
     setText('')
-    toast(res.persisted ? t('wishes.saved') : t('wishes.storageWarn'), res.persisted ? 'success' : 'warn')
+    toast(
+      res.persisted ? t('wishes.saved') : t('wishes.storageWarn'),
+      res.persisted ? 'success' : 'warn',
+    )
     onReleased?.(res.wish)
   }
 
@@ -47,7 +50,7 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
             onChange={(e) => setName(e.target.value.slice(0, WISH_NAME_MAX))}
             placeholder={t('wishes.namePlaceholder')}
             maxLength={WISH_NAME_MAX}
-            className="w-full rounded-2xl border border-white/10 bg-night-950/40 px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:border-gold-400/60"
+            className="bg-night-950/40 text-cream placeholder:text-cream/40 focus:border-gold-400/60 w-full rounded-2xl border border-white/10 px-4 py-2.5 text-sm"
           />
           <div className="relative">
             <textarea
@@ -57,7 +60,7 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
               rows={3}
               maxLength={WISH_TEXT_MAX}
               required
-              className="w-full resize-none rounded-2xl border border-white/10 bg-night-950/40 px-4 py-3 text-cream placeholder:text-cream/40 focus:border-gold-400/60"
+              className="bg-night-950/40 text-cream placeholder:text-cream/40 focus:border-gold-400/60 w-full resize-none rounded-2xl border border-white/10 px-4 py-3"
             />
             <span
               className={cn(
@@ -83,9 +86,14 @@ export function WishForm({ onReleased }: { onReleased?: (wish: Wish) => void }) 
               onClick={() => setColor(c)}
               className={cn(
                 'size-8 rounded-full border-2 transition',
-                color === c ? 'scale-110 border-cream' : 'border-transparent opacity-70 hover:opacity-100',
+                color === c
+                  ? 'border-cream scale-110'
+                  : 'border-transparent opacity-70 hover:opacity-100',
               )}
-              style={{ background: LANTERN_COLORS[c].body, boxShadow: `0 0 12px ${LANTERN_COLORS[c].glow}` }}
+              style={{
+                background: LANTERN_COLORS[c].body,
+                boxShadow: `0 0 12px ${LANTERN_COLORS[c].glow}`,
+              }}
             />
           ))}
         </div>

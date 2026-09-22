@@ -46,7 +46,9 @@ export function Stars({ count = 140 }: { count?: number }) {
     const draw = (t: number) => {
       ctx.clearRect(0, 0, w, h)
       for (const s of stars) {
-        const a = reduced ? 0.7 : 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t / 1000 * s.speed + s.phase))
+        const a = reduced
+          ? 0.7
+          : 0.35 + 0.65 * (0.5 + 0.5 * Math.sin((t / 1000) * s.speed + s.phase))
         ctx.beginPath()
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(255, 244, 214, ${a})`

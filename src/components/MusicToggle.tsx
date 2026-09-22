@@ -14,7 +14,7 @@ export function MusicToggle({ className }: { className?: string }) {
       aria-label={musicOn ? t('common.musicOn') : t('common.musicOff')}
       title={musicOn ? t('common.musicOn') : t('common.musicOff')}
       className={cn(
-        'glass inline-flex size-10 items-center justify-center rounded-full text-cream/80 transition hover:text-gold-300',
+        'glass text-cream/80 hover:text-gold-300 inline-flex size-10 items-center justify-center rounded-full transition',
         musicOn && 'text-gold-400',
         className,
       )}

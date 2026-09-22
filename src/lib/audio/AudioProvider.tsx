@@ -1,7 +1,16 @@
-import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { safeGet, safeSet } from '@/lib/storage'
 
-export type SfxName = 'catch' | 'golden' | 'miss' | 'flip' | 'match' | 'correct' | 'wrong' | 'win' | 'pop'
+export type SfxName =
+  'catch' | 'golden' | 'miss' | 'flip' | 'match' | 'correct' | 'wrong' | 'win' | 'pop'
 
 export interface AudioContextValue {
   musicOn: boolean
@@ -20,25 +29,43 @@ const BGM_SRC = '/audio/bgm.mp3'
 type Note = { f: number; t: number; d: number; type?: OscillatorType; g?: number }
 
 const SFX: Record<SfxName, Note[]> = {
-  catch: [{ f: 880, t: 0, d: 0.08 }, { f: 1320, t: 0.06, d: 0.12 }],
+  catch: [
+    { f: 880, t: 0, d: 0.08 },
+    { f: 1320, t: 0.06, d: 0.12 },
+  ],
   golden: [
     { f: 1046, t: 0, d: 0.1 },
     { f: 1318, t: 0.08, d: 0.1 },
     { f: 1568, t: 0.16, d: 0.1 },
     { f: 2093, t: 0.24, d: 0.2 },
   ],
-  miss: [{ f: 220, t: 0, d: 0.18, type: 'sawtooth', g: 0.12 }, { f: 160, t: 0.12, d: 0.2, type: 'sawtooth', g: 0.1 }],
+  miss: [
+    { f: 220, t: 0, d: 0.18, type: 'sawtooth', g: 0.12 },
+    { f: 160, t: 0.12, d: 0.2, type: 'sawtooth', g: 0.1 },
+  ],
   flip: [{ f: 600, t: 0, d: 0.06, type: 'triangle' }],
-  match: [{ f: 784, t: 0, d: 0.1 }, { f: 988, t: 0.09, d: 0.16 }],
-  correct: [{ f: 659, t: 0, d: 0.1 }, { f: 880, t: 0.1, d: 0.2 }],
-  wrong: [{ f: 300, t: 0, d: 0.15, type: 'square', g: 0.08 }, { f: 240, t: 0.14, d: 0.22, type: 'square', g: 0.08 }],
+  match: [
+    { f: 784, t: 0, d: 0.1 },
+    { f: 988, t: 0.09, d: 0.16 },
+  ],
+  correct: [
+    { f: 659, t: 0, d: 0.1 },
+    { f: 880, t: 0.1, d: 0.2 },
+  ],
+  wrong: [
+    { f: 300, t: 0, d: 0.15, type: 'square', g: 0.08 },
+    { f: 240, t: 0.14, d: 0.22, type: 'square', g: 0.08 },
+  ],
   win: [
     { f: 523, t: 0, d: 0.12 },
     { f: 659, t: 0.12, d: 0.12 },
     { f: 784, t: 0.24, d: 0.12 },
     { f: 1046, t: 0.36, d: 0.35 },
   ],
-  pop: [{ f: 440, t: 0, d: 0.05, type: 'triangle' }, { f: 660, t: 0.04, d: 0.08, type: 'triangle' }],
+  pop: [
+    { f: 440, t: 0, d: 0.05, type: 'triangle' },
+    { f: 660, t: 0.04, d: 0.08, type: 'triangle' },
+  ],
 }
 
 export function AudioProvider({ children }: { children: ReactNode }) {
@@ -50,7 +77,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) {
-      const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      const AC =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
       if (!AC) return null
       ctxRef.current = new AC()
     }

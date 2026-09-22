@@ -70,7 +70,7 @@ export function Modal({
           transition={{ duration: 0.2 }}
         >
           <div
-            className="absolute inset-0 bg-night-950/70 backdrop-blur-sm"
+            className="bg-night-950/70 absolute inset-0 backdrop-blur-sm"
             onClick={dismissible ? onClose : undefined}
             aria-hidden
           />
@@ -80,7 +80,7 @@ export function Modal({
             aria-modal="true"
             tabIndex={-1}
             className={cn(
-              'glass relative max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl bg-night-800/90 p-6 outline-none sm:p-8',
+              'glass bg-night-800/90 relative max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-6 outline-none sm:p-8',
               className,
             )}
             initial={{ y: 40, scale: 0.96, opacity: 0 }}
@@ -92,13 +92,15 @@ export function Modal({
               <button
                 onClick={onClose}
                 aria-label={t('common.close')}
-                className="absolute top-4 right-4 rounded-full p-2 text-cream/60 transition hover:bg-white/10 hover:text-cream"
+                className="text-cream/60 hover:text-cream absolute top-4 right-4 rounded-full p-2 transition hover:bg-white/10"
               >
                 <X className="size-5" />
               </button>
             )}
             {title && (
-              <h3 className="font-display text-glow mb-4 pr-8 text-2xl text-moon-500 sm:text-3xl">{title}</h3>
+              <h3 className="font-display text-glow text-moon-500 mb-4 pr-8 text-2xl sm:text-3xl">
+                {title}
+              </h3>
             )}
             {children}
           </motion.div>

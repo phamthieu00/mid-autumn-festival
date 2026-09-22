@@ -15,14 +15,14 @@ export function NightSky() {
       <Stars />
       <motion.div
         style={{ y: moonY, opacity: moonOpacity }}
-        className="absolute top-20 right-[6%] sm:top-24 sm:right-[10%]"
+        className="absolute top-20 right-[4%] sm:top-24 lg:right-[3%]"
       >
         <Moon />
       </motion.div>
       <FloatingLanterns />
       {/* hills silhouette */}
       <svg
-        className="absolute inset-x-0 bottom-0 h-40 w-full text-night-950 sm:h-56"
+        className="text-night-950 absolute inset-x-0 bottom-0 h-40 w-full sm:h-56"
         viewBox="0 0 1440 240"
         preserveAspectRatio="none"
       >

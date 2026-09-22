@@ -4,7 +4,10 @@ export const QUESTIONS: QuizQuestion[] = [
   {
     id: 'date',
     emoji: '📅',
-    question: { vi: 'Tết Trung Thu diễn ra vào ngày nào theo âm lịch?', en: 'On which lunar date is the Mid-Autumn Festival held?' },
+    question: {
+      vi: 'Tết Trung Thu diễn ra vào ngày nào theo âm lịch?',
+      en: 'On which lunar date is the Mid-Autumn Festival held?',
+    },
     options: [
       { vi: '15 tháng 7', en: '15th of the 7th month' },
       { vi: '15 tháng 8', en: '15th of the 8th month' },
@@ -12,12 +15,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: '15 tháng 9', en: '15th of the 9th month' },
     ],
     correctIndex: 1,
-    explanation: { vi: 'Trung Thu là rằm tháng Tám, khi trăng tròn và sáng nhất trong năm.', en: 'Mid-Autumn falls on the full moon of the 8th lunar month, the brightest of the year.' },
+    explanation: {
+      vi: 'Trung Thu là rằm tháng Tám, khi trăng tròn và sáng nhất trong năm.',
+      en: 'Mid-Autumn falls on the full moon of the 8th lunar month, the brightest of the year.',
+    },
   },
   {
     id: 'cuoi',
     emoji: '🌳',
-    question: { vi: 'Ai ngồi dưới gốc cây đa trên cung trăng trong truyện dân gian Việt Nam?', en: 'Who sits beneath the banyan tree on the moon in Vietnamese folklore?' },
+    question: {
+      vi: 'Ai ngồi dưới gốc cây đa trên cung trăng trong truyện dân gian Việt Nam?',
+      en: 'Who sits beneath the banyan tree on the moon in Vietnamese folklore?',
+    },
     options: [
       { vi: 'Thạch Sanh', en: 'Thạch Sanh' },
       { vi: 'Sơn Tinh', en: 'Sơn Tinh' },
@@ -25,12 +34,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Thánh Gióng', en: 'Thánh Gióng' },
     ],
     correctIndex: 2,
-    explanation: { vi: 'Chú Cuội bị cây đa thần kéo lên cung trăng và ngồi đó mãi mãi.', en: 'Cuội was carried to the moon by his magical banyan and has sat there ever since.' },
+    explanation: {
+      vi: 'Chú Cuội bị cây đa thần kéo lên cung trăng và ngồi đó mãi mãi.',
+      en: 'Cuội was carried to the moon by his magical banyan and has sat there ever since.',
+    },
   },
   {
     id: 'tree',
     emoji: '🍃',
-    question: { vi: 'Cây gì đã kéo Chú Cuội bay lên cung trăng?', en: 'Which tree carried Cuội up to the moon?' },
+    question: {
+      vi: 'Cây gì đã kéo Chú Cuội bay lên cung trăng?',
+      en: 'Which tree carried Cuội up to the moon?',
+    },
     options: [
       { vi: 'Cây tre', en: 'Bamboo' },
       { vi: 'Cây đa', en: 'Banyan' },
@@ -38,12 +53,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Cây gạo', en: 'Cotton tree' },
     ],
     correctIndex: 1,
-    explanation: { vi: 'Cây đa thần bật gốc bay lên trời vì bị tưới nước bẩn.', en: 'The magical banyan tore free and flew away after being watered with dirty water.' },
+    explanation: {
+      vi: 'Cây đa thần bật gốc bay lên trời vì bị tưới nước bẩn.',
+      en: 'The magical banyan tore free and flew away after being watered with dirty water.',
+    },
   },
   {
     id: 'rabbit',
     emoji: '🐇',
-    question: { vi: 'Con vật nào được cho là đang giã thuốc trên cung trăng?', en: 'Which animal is said to pound medicine on the moon?' },
+    question: {
+      vi: 'Con vật nào được cho là đang giã thuốc trên cung trăng?',
+      en: 'Which animal is said to pound medicine on the moon?',
+    },
     options: [
       { vi: 'Cáo trắng', en: 'White fox' },
       { vi: 'Cóc vàng', en: 'Golden toad' },
@@ -51,12 +72,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Mèo mun', en: 'Black cat' },
     ],
     correctIndex: 2,
-    explanation: { vi: 'Thỏ Ngọc là bạn đồng hành của Hằng Nga, ngày ngày giã thuốc trường sinh.', en: 'The Jade Rabbit keeps Hằng Nga company, pounding the elixir of life each day.' },
+    explanation: {
+      vi: 'Thỏ Ngọc là bạn đồng hành của Hằng Nga, ngày ngày giã thuốc trường sinh.',
+      en: 'The Jade Rabbit keeps Hằng Nga company, pounding the elixir of life each day.',
+    },
   },
   {
     id: 'lantern',
     emoji: '⭐',
-    question: { vi: 'Loại đèn truyền thống có hình năm cánh sao gọi là gì?', en: 'What is the traditional five-pointed lantern called?' },
+    question: {
+      vi: 'Loại đèn truyền thống có hình năm cánh sao gọi là gì?',
+      en: 'What is the traditional five-pointed lantern called?',
+    },
     options: [
       { vi: 'Đèn kéo quân', en: 'Đèn kéo quân' },
       { vi: 'Đèn ông sao', en: 'Đèn ông sao (star lantern)' },
@@ -64,12 +91,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Đèn cù', en: 'Đèn cù' },
     ],
     correctIndex: 1,
-    explanation: { vi: 'Đèn ông sao năm cánh bọc giấy bóng kính là biểu tượng quen thuộc nhất của Trung Thu.', en: 'The five-pointed cellophane star lantern is the most iconic Mid-Autumn toy.' },
+    explanation: {
+      vi: 'Đèn ông sao năm cánh bọc giấy bóng kính là biểu tượng quen thuộc nhất của Trung Thu.',
+      en: 'The five-pointed cellophane star lantern is the most iconic Mid-Autumn toy.',
+    },
   },
   {
     id: 'othername',
     emoji: '🌕',
-    question: { vi: 'Tết Trung Thu còn được gọi là gì?', en: 'What is another name for the Mid-Autumn Festival?' },
+    question: {
+      vi: 'Tết Trung Thu còn được gọi là gì?',
+      en: 'What is another name for the Mid-Autumn Festival?',
+    },
     options: [
       { vi: 'Tết Đoan Ngọ', en: 'Đoan Ngọ Festival' },
       { vi: 'Tết Hàn Thực', en: 'Hàn Thực Festival' },
@@ -77,12 +110,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Tết Nguyên Tiêu', en: 'Nguyên Tiêu Festival' },
     ],
     correctIndex: 2,
-    explanation: { vi: 'Trung Thu còn gọi là Tết Trông Trăng hay Tết Thiếu Nhi.', en: 'Mid-Autumn is also called the Moon-gazing Festival or Children’s Festival.' },
+    explanation: {
+      vi: 'Trung Thu còn gọi là Tết Trông Trăng hay Tết Thiếu Nhi.',
+      en: 'Mid-Autumn is also called the Moon-gazing Festival or Children’s Festival.',
+    },
   },
   {
     id: 'cakes',
     emoji: '🥮',
-    question: { vi: 'Hai loại bánh Trung Thu truyền thống của Việt Nam là gì?', en: 'What are the two traditional Vietnamese mooncakes?' },
+    question: {
+      vi: 'Hai loại bánh Trung Thu truyền thống của Việt Nam là gì?',
+      en: 'What are the two traditional Vietnamese mooncakes?',
+    },
     options: [
       { vi: 'Bánh chưng và bánh tét', en: 'Bánh chưng and bánh tét' },
       { vi: 'Bánh nướng và bánh dẻo', en: 'Baked cake and snow-skin cake' },
@@ -90,12 +129,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Bánh đúc và bánh bèo', en: 'Bánh đúc and bánh bèo' },
     ],
     correctIndex: 1,
-    explanation: { vi: 'Bánh nướng vỏ vàng giòn và bánh dẻo trắng mềm là cặp đôi không thể thiếu.', en: 'Golden baked cakes and soft white snow-skin cakes are the essential pair.' },
+    explanation: {
+      vi: 'Bánh nướng vỏ vàng giòn và bánh dẻo trắng mềm là cặp đôi không thể thiếu.',
+      en: 'Golden baked cakes and soft white snow-skin cakes are the essential pair.',
+    },
   },
   {
     id: 'liondance',
     emoji: '🦁',
-    question: { vi: 'Trong múa lân, nhân vật bụng to cầm quạt đi cùng lân là ai?', en: 'In the lion dance, who is the big-bellied character waving a fan?' },
+    question: {
+      vi: 'Trong múa lân, nhân vật bụng to cầm quạt đi cùng lân là ai?',
+      en: 'In the lion dance, who is the big-bellied character waving a fan?',
+    },
     options: [
       { vi: 'Ông Táo', en: 'Kitchen God' },
       { vi: 'Ông Địa', en: 'Earth God (Ông Địa)' },
@@ -103,12 +148,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Thổ Thần', en: 'Soil Deity' },
     ],
     correctIndex: 1,
-    explanation: { vi: 'Ông Địa với chiếc bụng phệ và nụ cười tươi dẫn lân đi mang may mắn.', en: 'Ông Địa, with his round belly and big smile, leads the lion to bring luck.' },
+    explanation: {
+      vi: 'Ông Địa với chiếc bụng phệ và nụ cười tươi dẫn lân đi mang may mắn.',
+      en: 'Ông Địa, with his round belly and big smile, leads the lion to bring luck.',
+    },
   },
   {
     id: 'husband',
     emoji: '🏹',
-    question: { vi: 'Hằng Nga là vợ của vị anh hùng nào?', en: 'Hằng Nga was the wife of which hero?' },
+    question: {
+      vi: 'Hằng Nga là vợ của vị anh hùng nào?',
+      en: 'Hằng Nga was the wife of which hero?',
+    },
     options: [
       { vi: 'Hậu Nghệ', en: 'Hậu Nghệ' },
       { vi: 'Ngưu Lang', en: 'Ngưu Lang' },
@@ -116,12 +167,18 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'An Dương Vương', en: 'An Dương Vương' },
     ],
     correctIndex: 0,
-    explanation: { vi: 'Hậu Nghệ bắn rơi chín mặt trời, được ban thuốc trường sinh mà sau đó Hằng Nga uống.', en: 'Hậu Nghệ shot down nine suns and received the elixir that Hằng Nga later drank.' },
+    explanation: {
+      vi: 'Hậu Nghệ bắn rơi chín mặt trời, được ban thuốc trường sinh mà sau đó Hằng Nga uống.',
+      en: 'Hậu Nghệ shot down nine suns and received the elixir that Hằng Nga later drank.',
+    },
   },
   {
     id: 'song',
     emoji: '🎵',
-    question: { vi: 'Bài hát "Chiếc đèn ông sao" do nhạc sĩ nào sáng tác?', en: 'Who composed the song "Chiếc đèn ông sao"?' },
+    question: {
+      vi: 'Bài hát "Chiếc đèn ông sao" do nhạc sĩ nào sáng tác?',
+      en: 'Who composed the song "Chiếc đèn ông sao"?',
+    },
     options: [
       { vi: 'Trịnh Công Sơn', en: 'Trịnh Công Sơn' },
       { vi: 'Văn Cao', en: 'Văn Cao' },
@@ -129,6 +186,9 @@ export const QUESTIONS: QuizQuestion[] = [
       { vi: 'Lê Thương', en: 'Lê Thương' },
     ],
     correctIndex: 2,
-    explanation: { vi: 'Nhạc sĩ Phạm Tuyên sáng tác "Chiếc đèn ông sao" năm 1956, bài ca Trung Thu quen thuộc nhất.', en: 'Phạm Tuyên wrote "Chiếc đèn ông sao" in 1956, the best-known Mid-Autumn song.' },
+    explanation: {
+      vi: 'Nhạc sĩ Phạm Tuyên sáng tác "Chiếc đèn ông sao" năm 1956, bài ca Trung Thu quen thuộc nhất.',
+      en: 'Phạm Tuyên wrote "Chiếc đèn ông sao" in 1956, the best-known Mid-Autumn song.',
+    },
   },
 ]

@@ -76,7 +76,8 @@ export default function MooncakeMatchGame() {
               {t('games.match.pairs')}: {state.matchedPairs}/{state.totalPairs}
             </Badge>
             <Badge className="text-sm">
-              {t('common.moves')}: <strong className="text-gold-300 tabular-nums">{state.moves}</strong>
+              {t('common.moves')}:{' '}
+              <strong className="text-gold-300 tabular-nums">{state.moves}</strong>
             </Badge>
           </>
         }

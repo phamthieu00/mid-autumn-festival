@@ -40,17 +40,19 @@ export function QuestionCard({
       transition={{ duration: 0.25 }}
       className="mx-auto w-full max-w-2xl p-4 sm:p-6"
     >
-      <div className="mb-2 flex items-center justify-between text-xs font-semibold tracking-widest text-lantern-400 uppercase">
+      <div className="text-lantern-400 mb-2 flex items-center justify-between text-xs font-semibold tracking-widest uppercase">
         <span>{t('games.quiz.question', { current: index + 1, total })}</span>
         <span className="text-2xl">{question.emoji}</span>
       </div>
       <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/10">
         <motion.div
-          className="h-full bg-gradient-to-r from-gold-500 to-lantern-500"
+          className="from-gold-500 to-lantern-500 h-full bg-gradient-to-r"
           animate={{ width: `${((index + (revealed ? 1 : 0)) / total) * 100}%` }}
         />
       </div>
-      <h2 className="text-xl leading-snug font-bold text-cream sm:text-2xl">{tx(question.question)}</h2>
+      <h2 className="text-cream text-xl leading-snug font-bold sm:text-2xl">
+        {tx(question.question)}
+      </h2>
 
       <div className="mt-6 grid gap-3">
         {optionOrder.map((optIdx, displayIdx) => {
@@ -66,12 +68,21 @@ export function QuestionCard({
                 'glass flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-base transition',
                 !revealed && 'hover:border-gold-400/60 hover:bg-white/10',
                 revealed && correct && 'border-jade/70 bg-jade/15 text-jade',
-                revealed && chosen && !correct && 'border-lantern-600/70 bg-lantern-600/15 text-lantern-300',
+                revealed &&
+                  chosen &&
+                  !correct &&
+                  'border-lantern-600/70 bg-lantern-600/15 text-lantern-300',
                 revealed && !chosen && !correct && 'opacity-50',
               )}
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-night-950/60 text-sm font-bold">
-                {revealed && correct ? <Check className="size-4" /> : revealed && chosen ? <X className="size-4" /> : letters[displayIdx]}
+              <span className="bg-night-950/60 flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+                {revealed && correct ? (
+                  <Check className="size-4" />
+                ) : revealed && chosen ? (
+                  <X className="size-4" />
+                ) : (
+                  letters[displayIdx]
+                )}
               </span>
               <span>{tx(question.options[optIdx])}</span>
             </button>
@@ -91,7 +102,7 @@ export function QuestionCard({
           <p className={cn('font-bold', isCorrect ? 'text-jade' : 'text-lantern-300')}>
             {isCorrect ? t('games.quiz.correct') : t('games.quiz.wrong')}
           </p>
-          <p className="mt-1 text-sm text-cream/80">{tx(question.explanation)}</p>
+          <p className="text-cream/80 mt-1 text-sm">{tx(question.explanation)}</p>
           <Button className="mt-4 w-full sm:w-auto" onClick={onNext} autoFocus>
             {isLast ? t('games.quiz.finish') : t('games.quiz.next')} →
           </Button>

@@ -1,4 +1,13 @@
-import { COMBO_THRESHOLD, DURATION, GRACE, POINTS, RADIUS, SPAWN_BASE, SPAWN_MIN, SPEED_BASE } from './constants'
+import {
+  COMBO_THRESHOLD,
+  DURATION,
+  GRACE,
+  POINTS,
+  RADIUS,
+  SPAWN_BASE,
+  SPAWN_MIN,
+  SPEED_BASE,
+} from './constants'
 import type { EngineEvent, EngineState, Entity, EntityKind } from './types'
 
 export function createState(w: number, h: number): EngineState {
@@ -37,7 +46,11 @@ export function pickKind(elapsed: number, rng: () => number): EntityKind {
   return 'lantern'
 }
 
-export function spawnEntity(state: EngineState, rng: () => number, kind = pickKind(state.elapsed, rng)): Entity {
+export function spawnEntity(
+  state: EngineState,
+  rng: () => number,
+  kind = pickKind(state.elapsed, rng),
+): Entity {
   const d = difficulty(state.elapsed)
   const r = RADIUS[kind]
   const margin = r + 10
@@ -137,7 +150,12 @@ export function pointsFor(kind: EntityKind, combo: number): number {
   return combo >= COMBO_THRESHOLD ? base * 2 : base
 }
 
-export function tapAt(state: EngineState, x: number, y: number, rng: () => number = Math.random): EngineEvent | null {
+export function tapAt(
+  state: EngineState,
+  x: number,
+  y: number,
+  rng: () => number = Math.random,
+): EngineEvent | null {
   if (state.finished) return null
   const e = hitTest(state, x, y)
   if (!e) return null

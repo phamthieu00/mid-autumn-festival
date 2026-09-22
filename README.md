@@ -35,11 +35,11 @@ src/
 
 ## Trò chơi
 
-| Game | Route | Cách tính điểm |
-|---|---|---|
-| Bắt lồng đèn | `/games/catch` | 60s, +1 / +5 vàng / −3 mây, combo ≥5 nhân đôi |
-| Ghép bánh | `/games/match` | 8 đôi, ít nước đi hơn là tốt hơn, thời gian là tie-break |
-| Đố vui | `/games/quiz` | 10 câu, 3 bậc danh hiệu |
+| Game         | Route          | Cách tính điểm                                           |
+| ------------ | -------------- | -------------------------------------------------------- |
+| Bắt lồng đèn | `/games/catch` | 60s, +1 / +5 vàng / −3 mây, combo ≥5 nhân đôi            |
+| Ghép bánh    | `/games/match` | 8 đôi, ít nước đi hơn là tốt hơn, thời gian là tie-break |
+| Đố vui       | `/games/quiz`  | 10 câu, 3 bậc danh hiệu                                  |
 
 ## Ngày Trung Thu
 

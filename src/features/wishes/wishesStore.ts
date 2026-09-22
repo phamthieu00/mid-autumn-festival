@@ -26,7 +26,8 @@ function makeId() {
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-export type AddWishResult = { ok: true; wish: Wish; persisted: boolean } | { ok: false; reason: 'empty' | 'tooLong' }
+export type AddWishResult =
+  { ok: true; wish: Wish; persisted: boolean } | { ok: false; reason: 'empty' | 'tooLong' }
 
 export const wishesStore = {
   getAll: (): Wish[] => load(),

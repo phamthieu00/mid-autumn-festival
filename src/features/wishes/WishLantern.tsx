@@ -39,19 +39,19 @@ export function WishLantern({
         </button>
         <div
           className={
-            'pointer-events-auto absolute top-1/2 left-full ml-2 w-44 -translate-y-1/2 rounded-2xl bg-night-950/85 p-3 text-xs text-cream shadow-lg backdrop-blur transition-opacity ' +
+            'bg-night-950/85 text-cream pointer-events-auto absolute top-1/2 left-full ml-2 w-44 -translate-y-1/2 rounded-2xl p-3 text-xs shadow-lg backdrop-blur transition-opacity ' +
             (open ? 'opacity-100' : 'pointer-events-none opacity-0')
           }
         >
           <p className="leading-snug">{wish.text}</p>
-          <div className="mt-2 flex items-center justify-between text-[10px] text-cream/50">
+          <div className="text-cream/50 mt-2 flex items-center justify-between text-[10px]">
             <span>— {wish.name || t('wishes.anonymous')}</span>
             {onRemove && (
               <button
                 type="button"
                 onClick={() => onRemove(wish.id)}
                 aria-label={t('wishes.remove')}
-                className="rounded p-0.5 hover:text-lantern-400"
+                className="hover:text-lantern-400 rounded p-0.5"
               >
                 <X className="size-3" />
               </button>

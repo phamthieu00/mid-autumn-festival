@@ -29,11 +29,15 @@ export function TraditionsSection() {
             whileHover={{ y: -6 }}
             className="glass rounded-3xl p-6"
           >
-            <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-night-950/50 text-3xl shadow-inner">
+            <div className="bg-night-950/50 mb-4 flex size-14 items-center justify-center rounded-2xl text-3xl shadow-inner">
               {item.emoji}
             </div>
-            <h3 className={`font-display text-xl ${item.accent}`}>{t(`home.traditions.${item.id}.title`)}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-cream/70">{t(`home.traditions.${item.id}.desc`)}</p>
+            <h3 className={`font-display text-xl ${item.accent}`}>
+              {t(`home.traditions.${item.id}.title`)}
+            </h3>
+            <p className="text-cream/70 mt-2 text-sm leading-relaxed">
+              {t(`home.traditions.${item.id}.desc`)}
+            </p>
           </motion.div>
         ))}
       </div>

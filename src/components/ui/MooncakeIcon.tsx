@@ -1,6 +1,9 @@
 import type { SVGProps } from 'react'
 
-export function MooncakeIcon({ color = '#e0a52a', ...props }: SVGProps<SVGSVGElement> & { color?: string }) {
+export function MooncakeIcon({
+  color = '#e0a52a',
+  ...props
+}: SVGProps<SVGSVGElement> & { color?: string }) {
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>

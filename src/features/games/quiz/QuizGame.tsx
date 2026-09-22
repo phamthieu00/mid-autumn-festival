@@ -8,7 +8,13 @@ import { GameShell } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
-import { buildOrders, correctDisplayIndex, initialQuizState, quizReducer, rankFor } from './quizReducer'
+import {
+  buildOrders,
+  correctDisplayIndex,
+  initialQuizState,
+  quizReducer,
+  rankFor,
+} from './quizReducer'
 import { QUESTIONS } from './questions'
 import { QuestionCard } from './QuestionCard'
 import type { QuizAction, QuizState } from './types'
@@ -18,7 +24,10 @@ const GAME = gameById('quiz')
 export default function QuizGame() {
   const { t } = useT()
   const { playSfx } = useAudio()
-  const [state, dispatch] = useReducer((s: QuizState, a: QuizAction) => quizReducer(s, a), initialQuizState)
+  const [state, dispatch] = useReducer(
+    (s: QuizState, a: QuizAction) => quizReducer(s, a),
+    initialQuizState,
+  )
   const [result, setResult] = useState<{ isRecord: boolean; prev?: number } | null>(null)
 
   const start = () => {
@@ -36,7 +45,11 @@ export default function QuizGame() {
     const action = { type: 'NEXT', now: Date.now() } as const
     const nextState = quizReducer(state, action)
     dispatch(action)
-    if (nextState.status === 'finished' && nextState.startedAt != null && nextState.finishedAt != null) {
+    if (
+      nextState.status === 'finished' &&
+      nextState.startedAt != null &&
+      nextState.finishedAt != null
+    ) {
       const seconds = Math.floor((nextState.finishedAt - nextState.startedAt) / 1000)
       const prev = scoresStore.getBest('quiz')?.value
       const isRecord = scoresStore.submit('quiz', nextState.score, seconds)
@@ -49,7 +62,8 @@ export default function QuizGame() {
   const total = QUESTIONS.length
   const rank = rankFor(state.score, total)
   const rankTitle = t(`games.quiz.rank${rank}`)
-  const shellStatus = state.status === 'idle' ? 'idle' : state.status === 'finished' ? 'over' : 'running'
+  const shellStatus =
+    state.status === 'idle' ? 'idle' : state.status === 'finished' ? 'over' : 'running'
 
   return (
     <>
@@ -60,7 +74,8 @@ export default function QuizGame() {
         areaClassName="min-h-[480px]"
         hud={
           <Badge className="text-sm">
-            {t('common.score')}: <strong className="text-gold-300 tabular-nums">{state.score}</strong>/{total}
+            {t('common.score')}:{' '}
+            <strong className="text-gold-300 tabular-nums">{state.score}</strong>/{total}
           </Badge>
         }
       >
