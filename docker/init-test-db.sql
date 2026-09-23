@@ -1,0 +1,1 @@
+CREATE DATABASE maf_test;
