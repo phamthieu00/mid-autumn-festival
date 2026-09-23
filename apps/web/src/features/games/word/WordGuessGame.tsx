@@ -1,18 +1,6 @@
 import { useEffect, useReducer, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useT } from '@/i18n'
-import { useAudio } from '@/hooks/useAudio'
-import { scoresStore } from '@/features/scores/scoresStore'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { cn } from '@/lib/cn'
-import { GameShell } from '../shared/GameShell'
-import { GameOverModal } from '../shared/GameOverModal'
-import { HudStat } from '../shared/HudStat'
-import { celebrate } from '../shared/celebrate'
-import { gameById } from '../shared/registry'
-import { Keyboard } from './Keyboard'
-import { LanternLives } from './LanternLives'
+import { seededRng } from '@maf/shared/random'
 import { toLetter, type Letter } from '@maf/shared/games/word/normalize'
 import {
   initialWordState,
@@ -23,23 +11,45 @@ import {
   wordReducer,
 } from '@maf/shared/games/word/wordReducer'
 import type { WordAction, WordState } from '@maf/shared/games/word/types'
+import { useT } from '@/i18n'
+import { useAudio } from '@/hooks/useAudio'
+import { scoresStore } from '@/features/scores/scoresStore'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { cn } from '@/lib/cn'
+import { GameShell, type GameStatus } from '../shared/GameShell'
+import { GameOverModal } from '../shared/GameOverModal'
+import { HudStat } from '../shared/HudStat'
+import { celebrate } from '../shared/celebrate'
+import { gameById } from '../shared/registry'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
+import { Keyboard } from './Keyboard'
+import { LanternLives } from './LanternLives'
 
 const GAME = gameById('word')
 
 export default function WordGuessGame() {
   const { t, tx } = useT()
   const { playSfx } = useAudio()
+  const session = useGameSession('word')
   const [state, dispatch] = useReducer(
     (s: WordState, a: WordAction) => wordReducer(s, a),
     initialWordState,
   )
+  const [starting, setStarting] = useState(false)
   const [result, setResult] = useState<{ isRecord: boolean; prev?: number } | null>(null)
 
   const round = state.rounds[state.current]
 
-  const start = () => {
+  const start = async () => {
     setResult(null)
-    dispatch({ type: 'START', entries: pickEntries(Math.random), now: Date.now() })
+    setStarting(true)
+    const outcome = await session.start()
+    setStarting(false)
+    if (outcome.kind === 'blocked') return
+    const rng = outcome.kind === 'online' ? seededRng(outcome.session.seed) : Math.random
+    dispatch({ type: 'START', entries: pickEntries(rng), now: Date.now() })
   }
 
   const guess = (letter: Letter) => {
@@ -71,10 +81,10 @@ export default function WordGuessGame() {
       setResult({ isRecord, prev })
       playSfx('win')
       celebrate(nextState.solved === WORDS_PER_GAME)
+      void session.finish({ rounds: nextState.rounds.map((r) => ({ guessed: r.guessed })) })
     }
   }
 
-  // physical keyboard
   useEffect(() => {
     if (state.status !== 'playing') return
     const onKey = (e: KeyboardEvent) => {
@@ -90,17 +100,27 @@ export default function WordGuessGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
-  const shellStatus =
-    state.status === 'idle' ? 'idle' : state.status === 'finished' ? 'over' : 'running'
+  const shellStatus: GameStatus = starting
+    ? 'starting'
+    : state.status === 'idle'
+      ? 'idle'
+      : state.status === 'finished'
+        ? 'over'
+        : 'running'
   const mask = round ? revealedMask(round.entry.word, round.guessed) : []
   const reveal = state.status === 'roundEnd'
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
 
   return (
     <>
       <GameShell
         game={GAME}
         status={shellStatus}
-        onStart={start}
+        onStart={() => void start()}
+        mode={session.mode}
+        onModeChange={session.setMode}
         areaClassName="min-h-[520px] p-4 sm:p-6"
         hud={
           <>
@@ -126,7 +146,6 @@ export default function WordGuessGame() {
         {round && (
           <div className="mx-auto flex max-w-2xl flex-col gap-6">
             <LanternLives wrong={round.wrong} />
-
             <div className="text-center">
               <Badge className="mb-2">{t(`games.word.cat.${round.entry.category}`)}</Badge>
               <p className="text-cream/80 text-base sm:text-lg">
@@ -134,7 +153,6 @@ export default function WordGuessGame() {
                 {tx(round.entry.hint)}
               </p>
             </div>
-
             <div className="flex flex-wrap justify-center gap-x-5 gap-y-3">
               {round.entry.word.split(' ').map((part, wi) => {
                 const offset = round.entry.word
@@ -167,7 +185,6 @@ export default function WordGuessGame() {
                 )
               })}
             </div>
-
             <AnimatePresence mode="wait">
               {reveal ? (
                 <motion.div
@@ -228,8 +245,11 @@ export default function WordGuessGame() {
         isRecord={result?.isRecord ?? false}
         previousBest={result?.prev}
         extra={t('games.word.solvedCount', { solved: state.solved, total: state.rounds.length })}
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        <ServerResultPanel session={session} gameId="word" unit={t('games.word.unit')} />
+      </GameOverModal>
     </>
   )
 }

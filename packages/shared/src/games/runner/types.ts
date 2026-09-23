@@ -59,6 +59,7 @@ export interface RunnerState {
   nextSpawnX: number
   nextId: number
   collected: number
+  pickupCounts: Record<PickupKind, number>
   collectPoints: number
   particles: Particle[]
   popups: Popup[]

@@ -1,16 +1,19 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { Timer } from 'lucide-react'
+import { seededRng } from '@maf/shared/random'
+import { createDeck, initialMatchState, matchReducer } from '@maf/shared/games/match/matchReducer'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { formatTime } from '@/lib/format'
 import { scoresStore } from '@/features/scores/scoresStore'
-import { HudStat } from '../shared/HudStat'
-import { GameShell } from '../shared/GameShell'
+import { GameShell, type GameStatus } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
+import { HudStat } from '../shared/HudStat'
 import { useStopwatch } from '../shared/useStopwatch'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
-import { createDeck, initialMatchState, matchReducer } from '@maf/shared/games/match/matchReducer'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
 import { MemoryCard } from './MemoryCard'
 
 const GAME = gameById('match')
@@ -18,12 +21,13 @@ const GAME = gameById('match')
 export default function MooncakeMatchGame() {
   const { t } = useT()
   const { playSfx } = useAudio()
+  const session = useGameSession('match')
   const [state, dispatch] = useReducer(matchReducer, initialMatchState)
   const elapsed = useStopwatch(state.startedAt, state.finishedAt)
+  const [starting, setStarting] = useState(false)
   const [result, setResult] = useState<{ isRecord: boolean; prev?: number } | null>(null)
   const prevMatched = useRef(0)
 
-  // auto-resolve mismatches
   useEffect(() => {
     if (state.status !== 'checking') return
     playSfx('wrong')
@@ -31,16 +35,20 @@ export default function MooncakeMatchGame() {
     return () => window.clearTimeout(id)
   }, [state.status, playSfx])
 
-  // match sfx
   useEffect(() => {
     if (state.matchedPairs > prevMatched.current && state.status !== 'won') playSfx('match')
     prevMatched.current = state.matchedPairs
   }, [state.matchedPairs, state.status, playSfx])
 
-  const start = () => {
+  const start = async () => {
     setResult(null)
     prevMatched.current = 0
-    dispatch({ type: 'START', cards: createDeck() })
+    setStarting(true)
+    const outcome = await session.start()
+    setStarting(false)
+    if (outcome.kind === 'blocked') return
+    const rng = outcome.kind === 'online' ? seededRng(outcome.session.seed) : Math.random
+    dispatch({ type: 'START', cards: createDeck(rng) })
   }
 
   const flip = (id: number) => {
@@ -55,17 +63,29 @@ export default function MooncakeMatchGame() {
       setResult({ isRecord, prev })
       playSfx('win')
       celebrate(isRecord)
+      void session.finish({ moves: next.moves, seconds })
     }
   }
 
-  const shellStatus = state.status === 'idle' ? 'idle' : state.status === 'won' ? 'over' : 'running'
+  const shellStatus: GameStatus = starting
+    ? 'starting'
+    : state.status === 'idle'
+      ? 'idle'
+      : state.status === 'won'
+        ? 'over'
+        : 'running'
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
 
   return (
     <>
       <GameShell
         game={GAME}
         status={shellStatus}
-        onStart={start}
+        onStart={() => void start()}
+        mode={session.mode}
+        onModeChange={session.setMode}
         areaClassName="p-3 sm:p-5"
         hud={
           <>
@@ -79,7 +99,7 @@ export default function MooncakeMatchGame() {
         }
       >
         <div className="mx-auto grid max-w-lg grid-cols-4 gap-2 sm:gap-3">
-          {(state.cards.length ? state.cards : createDeck()).map((card, i) => (
+          {(state.cards.length ? state.cards : createDeck(seededRng(1))).map((card, i) => (
             <MemoryCard
               key={card.id}
               card={state.cards.length ? card : { ...card, isFlipped: false, isMatched: false }}
@@ -101,8 +121,11 @@ export default function MooncakeMatchGame() {
         isRecord={result?.isRecord ?? false}
         previousBest={result?.prev}
         extra={`${t('common.time')}: ${formatTime(elapsed)}`}
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        <ServerResultPanel session={session} gameId="match" unit={t('games.match.unit')} />
+      </GameOverModal>
     </>
   )
 }

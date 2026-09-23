@@ -1,3 +1,5 @@
 export * from './auth'
 export * from './players'
 export * from './games'
+export * from './badges'
+export * from './wishes'

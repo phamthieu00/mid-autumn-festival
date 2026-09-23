@@ -66,6 +66,16 @@ export function posForDir(tiles: readonly number[], n: number, dir: Dir): number
   }
 }
 
+/** Direction the tile at `pos` would travel if slid into the blank, or null when not adjacent. */
+export function dirForPos(tiles: readonly number[], n: number, pos: number): Dir | null {
+  const blankPos = tiles.indexOf(blankId(n))
+  if (pos === blankPos + n) return 'up'
+  if (pos === blankPos - n) return 'down'
+  if (pos === blankPos + 1 && pos % n !== 0) return 'left'
+  if (pos === blankPos - 1 && blankPos % n !== 0) return 'right'
+  return null
+}
+
 export function shuffleSolvable(n: number, rng: () => number = Math.random): number[] {
   for (let attempt = 0; attempt < 20; attempt++) {
     const tiles = shuffle(solvedTiles(n), rng)

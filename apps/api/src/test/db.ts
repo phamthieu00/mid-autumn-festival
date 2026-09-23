@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto'
 import { sql } from '../db/client'
 import { env } from '../env'
+import { connectRedis, redis, redisReady } from '../redis'
 
 /**
  * better-auth stores the raw token but the cookie carries `token.signature`, where the signature is a
@@ -13,7 +14,9 @@ export function signSessionToken(token: string) {
 
 /** Truncate all app tables between tests (order-safe via CASCADE). */
 export async function resetDb() {
-  await sql`truncate table "personal_bests", "scores", "game_sessions", "daily_challenges", "players", "session", "account", "verification", "user" cascade`
+  if (!redisReady()) await connectRedis()
+  if (redisReady()) await redis.flushdb()
+  await sql`truncate table "wish_reports", "wishes", "player_badges", "personal_bests", "scores", "game_sessions", "daily_challenges", "players", "session", "account", "verification", "user" cascade`
 }
 
 export async function seedUserWithSession(

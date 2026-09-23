@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Footprints } from 'lucide-react'
+import { seededRng } from '@maf/shared/random'
+import { createState, metres, requestJump, score, update } from '@maf/shared/games/runner/engine'
+import type { RunnerState } from '@maf/shared/games/runner/types'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -10,9 +13,9 @@ import { HudStat } from '../shared/HudStat'
 import { useGameLoop } from '../shared/useGameLoop'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
-import { createState, metres, requestJump, score, update } from '@maf/shared/games/runner/engine'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
 import { render } from './renderer'
-import type { RunnerState } from '@maf/shared/games/runner/types'
 
 const GAME = gameById('runner')
 
@@ -20,9 +23,11 @@ export default function RunnerGame() {
   const { t } = useT()
   const { playSfx } = useAudio()
   const reduced = usePrefersReducedMotion()
+  const session = useGameSession('runner')
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const stateRef = useRef<RunnerState>(createState(800, 450))
+  const rngRef = useRef<() => number>(Math.random)
   const hudAcc = useRef(0)
   const finishTimer = useRef<number | null>(null)
 
@@ -76,11 +81,12 @@ export default function RunnerGame() {
     setResult({ score: final, isRecord, prev, metres: metres(s), collected: s.collected })
     playSfx('win')
     if (isRecord && final > 0) celebrate(true)
-  }, [playSfx, syncHud])
+    void session.finish({ metres: metres(s), pickups: s.pickupCounts })
+  }, [playSfx, syncHud, session])
 
   useGameLoop((dt) => {
     const s = stateRef.current
-    const events = update(s, dt, Math.random)
+    const events = update(s, dt, rngRef.current)
     for (const ev of events) {
       if (ev.type === 'pickup') playSfx(ev.kind === 'star' ? 'golden' : 'catch')
       if (ev.type === 'hit') {
@@ -104,7 +110,14 @@ export default function RunnerGame() {
     [],
   )
 
-  const start = () => {
+  const start = async () => {
+    setStatus('starting')
+    const outcome = await session.start()
+    if (outcome.kind === 'blocked') {
+      setStatus('idle')
+      return
+    }
+    rngRef.current = outcome.kind === 'online' ? seededRng(outcome.session.seed) : Math.random
     const { w, h } = stateRef.current
     stateRef.current = createState(w, h)
     finishTimer.current = null
@@ -133,14 +146,20 @@ export default function RunnerGame() {
     return () => window.removeEventListener('keydown', onKey)
   }, [status, jump])
 
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
+
   return (
     <>
       <GameShell
         game={GAME}
         status={status}
-        onStart={start}
+        onStart={() => void start()}
         onPause={() => setStatus('paused')}
         onResume={() => setStatus('running')}
+        mode={session.mode}
+        onModeChange={session.setMode}
         areaClassName="h-[min(60dvh,520px)] min-h-[340px]"
         hud={
           <>
@@ -176,8 +195,11 @@ export default function RunnerGame() {
         isRecord={result?.isRecord ?? false}
         previousBest={result?.prev}
         extra={`${t('common.distance')}: ${result?.metres ?? 0} m · ${t('games.runner.collected')}: ${result?.collected ?? 0}`}
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        <ServerResultPanel session={session} gameId="runner" unit={t('games.runner.unit')} />
+      </GameOverModal>
     </>
   )
 }

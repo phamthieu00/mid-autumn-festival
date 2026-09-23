@@ -1,8 +1,9 @@
 import { shuffle } from '@maf/shared/random'
 import { getBank } from '@maf/shared/quiz/bank/index'
 import { pickQuizSet } from '@maf/shared/quiz/pickQuizSet'
+import type { PublicQuizQuestion, QuizQuestion } from '@maf/shared/quiz/types'
 import { recentStore } from './recentStore'
-import { QUIZ_SIZE, type QuizAction, type QuizQuestion, type QuizState } from './types'
+import { QUIZ_SIZE, type QuizAction, type QuizState } from './types'
 
 export const initialQuizState: QuizState = {
   status: 'idle',
@@ -31,7 +32,7 @@ export function buildOrders(rng: () => number, questions: readonly QuizQuestion[
   return { order, optionOrders }
 }
 
-/** Pick a fresh set from the bank, remember it, and build the START action. */
+/** Offline mode: pick a fresh set from the local bank and remember it. */
 export function startQuiz(
   rng: () => number = Math.random,
   bank: readonly QuizQuestion[] = getBank(),
@@ -41,13 +42,31 @@ export function startQuiz(
   return { type: 'START', questions, ...buildOrders(rng, questions), now: Date.now() }
 }
 
+/** Online mode: questions come from the server without their answer key. */
+export function startOnlineQuiz(
+  publicQuestions: readonly PublicQuizQuestion[],
+  rng: () => number,
+): Extract<QuizAction, { type: 'START' }> {
+  const questions: QuizQuestion[] = publicQuestions.map((q) => ({
+    ...q,
+    correctIndex: -1,
+    explanation: { vi: '', en: '' },
+  }))
+  return { type: 'START', questions, ...buildOrders(rng, questions), now: Date.now() }
+}
+
 export function currentQuestion(state: QuizState): QuizQuestion {
   return state.questions[state.order[state.current]]
 }
 
-/** Display index of the correct option for the current question. */
+/** Display index of the correct option for the current question (-1 while unknown online). */
 export function correctDisplayIndex(state: QuizState): number {
   return state.optionOrders[state.current].indexOf(currentQuestion(state).correctIndex)
+}
+
+/** Original option index for a displayed option of the current question. */
+export function originalOptionIndex(state: QuizState, displayIndex: number): number {
+  return state.optionOrders[state.current][displayIndex]
 }
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
@@ -63,6 +82,14 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       }
     case 'RESET':
       return initialQuizState
+    case 'SET_KEY': {
+      const qi = state.order[action.questionIndex]
+      if (qi === undefined) return state
+      const questions = state.questions.map((q, i) =>
+        i === qi ? { ...q, correctIndex: action.correctIndex, explanation: action.explanation } : q,
+      )
+      return { ...state, questions }
+    }
     case 'ANSWER': {
       if (state.status !== 'answering') return state
       const correct = correctDisplayIndex(state) === action.index

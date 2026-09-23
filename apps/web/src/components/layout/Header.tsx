@@ -5,6 +5,7 @@ import { useT } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { MusicToggle } from '@/components/MusicToggle'
+import { UserMenu } from '@/features/auth/UserMenu'
 import { MobileNav } from './MobileNav'
 import { NAV_LINKS } from './navLinks'
 
@@ -46,6 +47,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <LanguageToggle className="hidden sm:inline-flex" />
           <MusicToggle />
+          <UserMenu />
           <button
             onClick={() => setOpen(true)}
             aria-label={t('common.menu')}

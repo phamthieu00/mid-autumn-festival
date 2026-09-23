@@ -15,6 +15,13 @@
       "when": 1790175835403,
       "tag": "0001_red_tusk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790176627710,
+      "tag": "0002_rapid_naoko",
+      "breakpoints": true
     }
   ]
 }

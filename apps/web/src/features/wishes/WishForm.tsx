@@ -1,13 +1,18 @@
 import { useRef, useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Send } from 'lucide-react'
+import type { WishItem } from '@maf/shared/api'
 import { Button } from '@/components/ui/Button'
 import { LanternIcon } from '@/components/ui/LanternIcon'
 import { LANTERN_COLORS, type LanternColor } from '@/components/ui/lanternColors'
 import { useToast } from '@/components/ui/Toast'
 import { useAudio } from '@/hooks/useAudio'
 import { useT } from '@/i18n'
+import { api, ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
+import { useAuth } from '@/features/auth/useAuth'
 import { prefetchLanternRelease } from './prefetchLanternRelease'
+import { toWish, WISHES_QUERY_KEY } from './useWishes'
 import { wishesStore } from './wishesStore'
 import { WISH_NAME_MAX, WISH_TEXT_MAX, type Wish } from './types'
 
@@ -20,36 +25,62 @@ export function WishForm({
   onReleased?: (wish: Wish, origin: { x: number; y: number }) => void
   disabled?: boolean
 }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const { toast } = useToast()
   const { playSfx } = useAudio()
+  const { player } = useAuth()
+  const qc = useQueryClient()
   const [text, setText] = useState('')
   const [name, setName] = useState('')
-  const [color, setColor] = useState<LanternColor>('red')
+  const [color, setColor] = useState<LanternColor>(
+    (player?.color as LanternColor | undefined) ?? 'red',
+  )
+  const [busy, setBusy] = useState(false)
   const submitRef = useRef<HTMLButtonElement>(null)
 
   const remaining = WISH_TEXT_MAX - text.length
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (disabled) return
-    const res = wishesStore.add({ text, name, color })
-    if (!res.ok) {
-      if (res.reason === 'tooLong') toast(t('wishes.tooLong', { max: WISH_TEXT_MAX }), 'warn')
-      return
-    }
-    playSfx('flip')
-    setText('')
-    if (!res.persisted) toast(t('wishes.storageWarn'), 'warn')
+    if (disabled || busy) return
+    const trimmed = text.trim()
+    if (!trimmed) return
+    setBusy(true)
     const rect = submitRef.current?.getBoundingClientRect()
     const origin = rect
       ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
       : { x: window.innerWidth / 2, y: window.innerHeight * 0.7 }
-    onReleased?.(res.wish, origin)
+    try {
+      const res = await api<{ wish: WishItem; newBadges: string[] }>('/wishes', {
+        method: 'POST',
+        body: { text: trimmed, name: name.trim() || undefined, color, lang },
+      })
+      playSfx('flip')
+      setText('')
+      if (res.wish.status === 'pending') toast(t('wishes.pendingNotice'), 'warn')
+      void qc.invalidateQueries({ queryKey: WISHES_QUERY_KEY })
+      onReleased?.(toWish(res.wish), origin)
+    } catch (err) {
+      const e = err as ApiError
+      if (e.isNetwork || e.status >= 500) {
+        const local = wishesStore.add({ text: trimmed, name: name.trim() || undefined, color })
+        if (local.ok) {
+          playSfx('flip')
+          setText('')
+          toast(t('wishes.storageWarn'), 'warn')
+          onReleased?.(local.wish, origin)
+        }
+      } else if (e.code === 'INAPPROPRIATE') toast(t('wishes.blockedWords'), 'warn')
+      else if (e.code === 'NO_LINKS') toast(t('wishes.noLinks'), 'warn')
+      else if (e.code === 'RATE_LIMITED') toast(t('wishes.rateLimited'), 'warn')
+      else toast(t('wishes.tooLong', { max: WISH_TEXT_MAX }), 'warn')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <form onSubmit={submit} className="glass space-y-4 rounded-3xl p-5 sm:p-6">
+    <form onSubmit={(e) => void submit(e)} className="glass space-y-4 rounded-3xl p-5 sm:p-6">
       <div className="flex items-start gap-4">
         <div className="hidden shrink-0 sm:block">
           <LanternIcon color={color} className="animate-float h-24 w-16" />
@@ -58,7 +89,7 @@ export function WishForm({
           <input
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, WISH_NAME_MAX))}
-            placeholder={t('wishes.namePlaceholder')}
+            placeholder={player?.nickname ?? t('wishes.namePlaceholder')}
             maxLength={WISH_NAME_MAX}
             className="bg-night-950/40 text-cream placeholder:text-cream/40 focus:border-gold-400/60 w-full rounded-2xl border border-white/10 px-4 py-2.5 text-sm"
           />
@@ -84,7 +115,6 @@ export function WishForm({
           </div>
         </div>
       </div>
-
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2" role="radiogroup" aria-label={t('wishes.color')}>
           {COLORS.map((c) => (
@@ -108,7 +138,7 @@ export function WishForm({
             />
           ))}
         </div>
-        <Button ref={submitRef} type="submit" disabled={!text.trim() || disabled}>
+        <Button ref={submitRef} type="submit" disabled={!text.trim() || disabled || busy}>
           <Send className="size-4" />
           {disabled ? t('wishes.releasing') : t('wishes.send')}
         </Button>

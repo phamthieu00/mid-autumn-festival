@@ -3,6 +3,7 @@ import { SEO } from '@/components/SEO'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { GameCard } from '@/features/games/shared/GameCard'
 import { gamesByKind } from '@/features/games/shared/registry'
+import { DailySection } from '@/features/daily/DailySection'
 
 export default function GamesHubPage() {
   const { t } = useT()
@@ -16,6 +17,9 @@ export default function GamesHubPage() {
         title={t('games.hub.title')}
         subtitle={t('games.hub.subtitle')}
       />
+      <div className="-mx-4 mb-10 sm:-mx-6">
+        <DailySection compact />
+      </div>
       <h3 className="text-lantern-400 mb-4 text-xs font-semibold tracking-[0.2em] uppercase">
         {t('games.hub.groupAction')}
       </h3>

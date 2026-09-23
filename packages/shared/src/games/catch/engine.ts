@@ -19,6 +19,7 @@ export function createState(w: number, h: number): EngineState {
     combo: 0,
     maxCombo: 0,
     caught: 0,
+    counts: { lantern: 0, golden: 0, cloud: 0 },
     entities: [],
     particles: [],
     popups: [],
@@ -161,6 +162,7 @@ export function tapAt(
   if (!e) return null
 
   const points = pointsFor(e.kind, state.combo)
+  state.counts[e.kind]++
   if (e.kind === 'cloud') {
     state.combo = 0
   } else {

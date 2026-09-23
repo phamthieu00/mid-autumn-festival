@@ -1,26 +1,30 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Eye, Timer } from 'lucide-react'
+import { seededRng } from '@maf/shared/random'
+import {
+  blankId,
+  canSlide,
+  dirForPos,
+  initialPuzzleState,
+  puzzleReducer,
+  shuffleSolvable,
+} from '@maf/shared/games/puzzle/puzzleLogic'
+import type { Dir, PuzzleAction, PuzzleSize, PuzzleState } from '@maf/shared/games/puzzle/types'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { formatTime } from '@/lib/format'
 import { scoresStore } from '@/features/scores/scoresStore'
 import { cn } from '@/lib/cn'
-import { GameShell } from '../shared/GameShell'
+import { GameShell, type GameStatus } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
 import { HudStat } from '../shared/HudStat'
 import { useStopwatch } from '../shared/useStopwatch'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
 import { PuzzleTile } from './PuzzleTile'
-import {
-  blankId,
-  canSlide,
-  initialPuzzleState,
-  puzzleReducer,
-  shuffleSolvable,
-} from '@maf/shared/games/puzzle/puzzleLogic'
 import { renderSceneDataUrl } from './scene'
-import type { Dir, PuzzleAction, PuzzleSize, PuzzleState } from '@maf/shared/games/puzzle/types'
 
 const GAME = gameById('puzzle')
 const KEY_DIR: Record<string, Dir> = {
@@ -33,12 +37,14 @@ const KEY_DIR: Record<string, Dir> = {
 export default function MoonPuzzleGame() {
   const { t } = useT()
   const { playSfx } = useAudio()
+  const session = useGameSession('puzzle')
   const [state, dispatch] = useReducer(
     (s: PuzzleState, a: PuzzleAction) => puzzleReducer(s, a),
     initialPuzzleState,
   )
   const [size, setSize] = useState<PuzzleSize>(3)
   const [peek, setPeek] = useState(false)
+  const [starting, setStarting] = useState(false)
   const [result, setResult] = useState<{
     isRecord: boolean
     prev?: number
@@ -46,19 +52,41 @@ export default function MoonPuzzleGame() {
   } | null>(null)
   const elapsed = useStopwatch(state.startedAt, state.finishedAt)
   const img = useMemo(() => renderSceneDataUrl(600), [])
+  const movesRef = useRef<Dir[]>([])
+  const onlineRef = useRef(false)
 
   const n = state.tiles.length ? state.size : size
   const tiles = state.tiles.length ? state.tiles : Array.from({ length: n * n }, (_, i) => i)
   const blank = blankId(n)
 
-  const start = () => {
+  const start = async () => {
     setResult(null)
-    dispatch({ type: 'START', size, tiles: shuffleSolvable(size), now: Date.now() })
+    movesRef.current = []
+    let rng: () => number = Math.random
+    onlineRef.current = false
+    if (size === 3) {
+      setStarting(true)
+      const outcome = await session.start()
+      setStarting(false)
+      if (outcome.kind === 'blocked') return
+      if (outcome.kind === 'online') {
+        rng = seededRng(outcome.session.seed)
+        onlineRef.current = true
+      }
+    }
+    dispatch({ type: 'START', size, tiles: shuffleSolvable(size, rng), now: Date.now() })
   }
 
   const move = (action: PuzzleAction) => {
     const next = puzzleReducer(state, action)
     if (next === state) return
+    const dir =
+      action.type === 'KEY'
+        ? action.dir
+        : action.type === 'SLIDE'
+          ? dirForPos(state.tiles, state.size, action.pos)
+          : null
+    if (dir) movesRef.current.push(dir)
     playSfx('flip')
     dispatch(action)
     if (next.status === 'won' && next.startedAt != null && next.finishedAt != null) {
@@ -69,6 +97,8 @@ export default function MoonPuzzleGame() {
       setResult({ isRecord, prev, counted })
       playSfx('win')
       celebrate(isRecord || next.size === 4)
+      if (counted && onlineRef.current)
+        void session.finish({ size: 3, moves: movesRef.current, seconds })
     }
   }
 
@@ -85,14 +115,25 @@ export default function MoonPuzzleGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
-  const shellStatus = state.status === 'idle' ? 'idle' : state.status === 'won' ? 'over' : 'running'
+  const shellStatus: GameStatus = starting
+    ? 'starting'
+    : state.status === 'idle'
+      ? 'idle'
+      : state.status === 'won'
+        ? 'over'
+        : 'running'
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
 
   return (
     <>
       <GameShell
         game={GAME}
         status={shellStatus}
-        onStart={start}
+        onStart={() => void start()}
+        mode={size === 3 ? session.mode : undefined}
+        onModeChange={size === 3 ? session.setMode : undefined}
         areaClassName="p-3 sm:p-5"
         hud={
           <>
@@ -174,8 +215,13 @@ export default function MoonPuzzleGame() {
         isRecord={result?.isRecord ?? false}
         previousBest={result?.prev}
         extra={`${t('common.time')}: ${formatTime(elapsed)}${result && !result.counted ? ` · ${t('games.puzzle.challengeNote')}` : ''}`}
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        {result?.counted && (
+          <ServerResultPanel session={session} gameId="puzzle" unit={t('games.puzzle.unit')} />
+        )}
+      </GameOverModal>
     </>
   )
 }

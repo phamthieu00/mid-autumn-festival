@@ -2,13 +2,14 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, Pause, Play } from 'lucide-react'
+import type { SessionMode } from '@maf/shared/games/rules'
 import { useT } from '@/i18n'
 import { Button } from '@/components/ui/Button'
 import { SEO } from '@/components/SEO'
 import { StartOverlay } from './StartOverlay'
 import type { GameMeta } from './registry'
 
-export type GameStatus = 'idle' | 'running' | 'paused' | 'over'
+export type GameStatus = 'idle' | 'starting' | 'running' | 'paused' | 'over'
 
 export function GameShell({
   game,
@@ -19,6 +20,8 @@ export function GameShell({
   hud,
   children,
   areaClassName = '',
+  mode,
+  onModeChange,
 }: {
   game: GameMeta
   status: GameStatus
@@ -28,6 +31,8 @@ export function GameShell({
   hud?: ReactNode
   children: ReactNode
   areaClassName?: string
+  mode?: SessionMode
+  onModeChange?: (mode: SessionMode) => void
 }) {
   const { t } = useT()
   return (
@@ -44,6 +49,11 @@ export function GameShell({
         <h1 className="font-display text-glow text-moon-500 text-2xl sm:text-3xl">
           {game.emoji} {t(game.titleKey)}
         </h1>
+        {mode === 'daily' && status !== 'idle' && (
+          <span className="border-jade/40 bg-jade/10 text-jade rounded-full border px-2.5 py-0.5 text-xs font-bold">
+            {t('games.shared.modeDaily')}
+          </span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           {hud}
           {onPause && status === 'running' && (
@@ -59,7 +69,16 @@ export function GameShell({
       >
         {children}
         <AnimatePresence>
-          {status === 'idle' && <StartOverlay key="start" game={game} onStart={onStart} />}
+          {(status === 'idle' || status === 'starting') && (
+            <StartOverlay
+              key="start"
+              game={game}
+              onStart={onStart}
+              mode={mode}
+              onModeChange={onModeChange}
+              starting={status === 'starting'}
+            />
+          )}
           {status === 'paused' && (
             <motion.div
               key="pause"

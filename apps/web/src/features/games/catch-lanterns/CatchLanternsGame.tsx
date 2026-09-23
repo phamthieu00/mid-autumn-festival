@@ -1,27 +1,32 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
 import { Flame, Timer } from 'lucide-react'
+import { seededRng } from '@maf/shared/random'
+import { createState, tapAt, timeLeft, update } from '@maf/shared/games/catch/engine'
+import { COMBO_THRESHOLD } from '@maf/shared/games/catch/constants'
+import type { EngineState } from '@maf/shared/games/catch/types'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { scoresStore } from '@/features/scores/scoresStore'
-import { HudStat } from '../shared/HudStat'
 import { GameShell, type GameStatus } from '../shared/GameShell'
 import { GameOverModal } from '../shared/GameOverModal'
+import { HudStat } from '../shared/HudStat'
 import { useGameLoop } from '../shared/useGameLoop'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
-import { createState, tapAt, timeLeft, update } from '@maf/shared/games/catch/engine'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
 import { render } from './renderer'
-import { COMBO_THRESHOLD } from '@maf/shared/games/catch/constants'
-import type { EngineState } from '@maf/shared/games/catch/types'
 
 const GAME = gameById('catch')
 
 export default function CatchLanternsGame() {
   const { t } = useT()
   const { playSfx } = useAudio()
+  const session = useGameSession('catch')
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const stateRef = useRef<EngineState>(createState(360, 560))
+  const rngRef = useRef<() => number>(Math.random)
   const hudAcc = useRef(0)
 
   const [status, setStatus] = useState<GameStatus>('idle')
@@ -33,7 +38,6 @@ export default function CatchLanternsGame() {
     maxCombo: number
   } | null>(null)
 
-  // canvas sizing
   useEffect(() => {
     const wrap = wrapRef.current
     const canvas = canvasRef.current
@@ -69,11 +73,12 @@ export default function CatchLanternsGame() {
     setResult({ score: s.score, isRecord, prev, maxCombo: s.maxCombo })
     playSfx('win')
     if (isRecord && s.score > 0) celebrate(true)
-  }, [playSfx, syncHud])
+    void session.finish({ score: s.score, counts: s.counts, maxCombo: s.maxCombo })
+  }, [playSfx, syncHud, session])
 
   useGameLoop((dt) => {
     const s = stateRef.current
-    const events = update(s, dt, Math.random)
+    const events = update(s, dt, rngRef.current)
     for (const ev of events) {
       if (ev.type === 'timeup') finish()
       if (ev.type === 'miss') syncHud()
@@ -87,7 +92,14 @@ export default function CatchLanternsGame() {
     if (ctx) render(ctx, s)
   }, status === 'running')
 
-  const start = () => {
+  const start = async () => {
+    setStatus('starting')
+    const outcome = await session.start()
+    if (outcome.kind === 'blocked') {
+      setStatus('idle')
+      return
+    }
+    rngRef.current = outcome.kind === 'online' ? seededRng(outcome.session.seed) : Math.random
     const { w, h } = stateRef.current
     stateRef.current = createState(w, h)
     setResult(null)
@@ -101,21 +113,27 @@ export default function CatchLanternsGame() {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * stateRef.current.w
     const y = ((e.clientY - rect.top) / rect.height) * stateRef.current.h
-    const ev = tapAt(stateRef.current, x, y)
+    const ev = tapAt(stateRef.current, x, y, rngRef.current)
     if (ev && ev.type === 'catch') {
       playSfx(ev.kind === 'cloud' ? 'miss' : ev.kind === 'golden' ? 'golden' : 'catch')
       syncHud()
     }
   }
 
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
+
   return (
     <>
       <GameShell
         game={GAME}
         status={status}
-        onStart={start}
+        onStart={() => void start()}
         onPause={() => setStatus('paused')}
         onResume={() => setStatus('running')}
+        mode={session.mode}
+        onModeChange={session.setMode}
         areaClassName="h-[min(70dvh,640px)] min-h-[420px]"
         hud={
           <>
@@ -155,8 +173,11 @@ export default function CatchLanternsGame() {
         isRecord={result?.isRecord ?? false}
         previousBest={result?.prev}
         extra={`${t('games.catch.combo')} max: ${result?.maxCombo ?? 0}`}
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        <ServerResultPanel session={session} gameId="catch" unit={t('games.catch.unit')} />
+      </GameOverModal>
     </>
   )
 }

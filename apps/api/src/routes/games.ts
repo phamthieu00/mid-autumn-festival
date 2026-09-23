@@ -7,6 +7,7 @@ import { rateLimit } from '../middleware/rateLimit'
 import { clientIpHash } from '../middleware/ip'
 import { startSession } from '../services/sessions/start'
 import { answerQuestion, finishSession } from '../services/sessions/finish'
+import { metrics } from '../metrics'
 
 const StartBody = z.object({ mode: SessionModeSchema.default('free') })
 const AnswerBody = z.object({
@@ -30,6 +31,7 @@ export const gameRoutes = new Hono<SessionVars>()
         mode,
         ipHash: clientIpHash(c),
       })
+      metrics.sessionsStarted.inc({ game: gameId, mode })
       return c.json(result, 201)
     },
   )

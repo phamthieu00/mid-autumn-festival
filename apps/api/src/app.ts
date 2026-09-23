@@ -5,10 +5,16 @@ import { bodyLimit } from 'hono/body-limit'
 import { errorHandler } from './middleware/error'
 import { requestLogger } from './middleware/logger'
 import { healthRoutes } from './routes/health'
+import { metricsRoutes } from './routes/metrics'
 import { meRoutes } from './routes/me'
 import { gameRoutes } from './routes/games'
 import { leaderboardRoutes } from './routes/leaderboards'
 import { dailyRoutes } from './routes/daily'
+import { playerRoutes } from './routes/players'
+import { wishRoutes } from './routes/wishes'
+import { adminRoutes } from './routes/admin'
+import { resultRoutes } from './routes/results'
+import { shareRoutes } from './routes/share'
 import { auth } from './auth'
 import { sessionMiddleware, type SessionVars } from './middleware/session'
 import { sameOriginGuard } from './middleware/sameOrigin'
@@ -24,6 +30,7 @@ export function createApp() {
   app.use('/api/*', bodyLimit({ maxSize: 16 * 1024 }))
 
   app.route('/api', healthRoutes)
+  app.route('/api', metricsRoutes)
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw))
   app.use('/api/*', sessionMiddleware)
   app.use('/api/*', sameOriginGuard)
@@ -31,6 +38,11 @@ export function createApp() {
   app.route('/api', gameRoutes)
   app.route('/api', leaderboardRoutes)
   app.route('/api', dailyRoutes)
+  app.route('/api', playerRoutes)
+  app.route('/api', wishRoutes)
+  app.route('/api', adminRoutes)
+  app.route('/api', resultRoutes)
+  app.route('/', shareRoutes)
 
   app.notFound((c) => c.json({ error: { code: 'NOT_FOUND', message: 'Not found' } }, 404))
   app.onError(errorHandler)

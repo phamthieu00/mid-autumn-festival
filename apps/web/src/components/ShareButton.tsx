@@ -3,18 +3,23 @@ import { Button, type ButtonProps } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { useT } from '@/i18n'
 
-export function ShareButton({ text, children, ...props }: ButtonProps & { text: string }) {
+export function ShareButton({
+  text,
+  url,
+  children,
+  ...props
+}: ButtonProps & { text: string; url?: string }) {
   const { t } = useT()
   const { toast } = useToast()
 
   const share = async () => {
-    const url = window.location.origin
+    const target = url ?? window.location.origin
     try {
       if (navigator.share) {
-        await navigator.share({ text, url })
+        await navigator.share({ text, url: target })
         return
       }
-      await navigator.clipboard.writeText(`${text} ${url}`)
+      await navigator.clipboard.writeText(`${text} ${target}`)
       toast(t('common.copied'), 'success')
     } catch {
       /* user cancelled */

@@ -1,25 +1,31 @@
 import { LanternIcon } from '@/components/ui/LanternIcon'
 import { useT } from '@/i18n'
 import { cn } from '@/lib/cn'
-import { useWishes } from './useWishes'
-import { wishesStore } from './wishesStore'
 import { WishLantern } from './WishLantern'
-import { WISHES_VISIBLE } from './types'
+import { WISHES_VISIBLE, type Wish } from './types'
 
 export function WishesWall({
+  wishes,
+  pending = [],
+  total,
   className,
   compact = false,
   hideId,
   highlightId,
+  onReport,
 }: {
+  wishes: Wish[]
+  pending?: Wish[]
+  total: number
   className?: string
   compact?: boolean
   hideId?: string | null
   highlightId?: string | null
+  onReport?: (id: string) => void
 }) {
   const { t } = useT()
-  const wishes = useWishes()
-  const visible = wishes.slice(-WISHES_VISIBLE).filter((w) => w.id !== hideId)
+  const visible = [...wishes.slice(-WISHES_VISIBLE), ...pending].filter((w) => w.id !== hideId)
+  const pendingIds = new Set(pending.map((w) => w.id))
 
   return (
     <div
@@ -44,12 +50,13 @@ export function WishesWall({
                 wish={w}
                 index={i}
                 highlight={w.id === highlightId}
-                onRemove={(id) => wishesStore.remove(id)}
+                pending={pendingIds.has(w.id)}
+                onReport={onReport}
               />
             ))}
           </div>
           <div className="bg-night-950/60 text-cream/70 absolute top-3 left-4 rounded-full px-3 py-1 text-xs">
-            ✨ {t('wishes.count', { count: wishes.length })}
+            ✨ {t('wishes.count', { count: total })}
           </div>
         </>
       )}

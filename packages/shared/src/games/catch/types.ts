@@ -40,6 +40,7 @@ export interface EngineState {
   combo: number
   maxCombo: number
   caught: number
+  counts: Record<EntityKind, number>
   entities: Entity[]
   particles: Particle[]
   popups: Popup[]

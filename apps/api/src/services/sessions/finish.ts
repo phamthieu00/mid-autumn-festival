@@ -25,6 +25,8 @@ import {
 } from '../../db/schema/index'
 import { ApiError } from '../../middleware/error'
 import { pushToZsets, rankOf } from '../leaderboards'
+import { awardBadges } from '../badges'
+import { metrics } from '../../metrics'
 import { questionById } from './start'
 
 const publicId = customAlphabet('23456789abcdefghjkmnpqrstuvwxyz', 10)
@@ -40,6 +42,7 @@ export interface FinishResult {
   ranks: { alltime: number | null; weekly: number | null; daily: number | null }
   flags: string[]
   anonymous: boolean
+  newBadges: string[]
 }
 
 function verify(session: GameSession, body: unknown, elapsedSec: number): VerifyResult {
@@ -111,9 +114,11 @@ export async function finishSession(
         flags: sql`array_append(${gameSessions.flags}, ${result.reason})`,
       })
       .where(eq(gameSessions.id, id))
+    metrics.sessionsFinished.inc({ game: session.gameId, result: 'rejected' })
     throw new ApiError(422, 'REJECTED', result.reason)
   }
 
+  metrics.sessionsFinished.inc({ game: session.gameId, result: 'accepted' })
   const rankScore = encodeRankScore(session.gameId, result.value, result.secondary)
   const keys = periodKeys(session.finishedAt!)
   const boardKeys =
@@ -167,6 +172,7 @@ export async function finishSession(
   })
 
   const ranks: FinishResult['ranks'] = { alltime: null, weekly: null, daily: null }
+  let newBadges: string[] = []
   if (session.userId) {
     await pushToZsets(session.gameId, session.userId, rankScore, boardKeys)
     const [a, w, d] = await Promise.all([
@@ -179,6 +185,12 @@ export async function finishSession(
     ranks.alltime = a?.rank ?? null
     ranks.weekly = w?.rank ?? null
     ranks.daily = d?.rank ?? null
+    newBadges = await awardBadges(session.userId, {
+      gameId: session.gameId,
+      value: result.value,
+      meta: result.meta,
+      weeklyRank: ranks.weekly,
+    })
   }
 
   return {
@@ -192,6 +204,7 @@ export async function finishSession(
     ranks,
     flags: result.flags,
     anonymous: !session.userId,
+    newBadges,
   }
 }
 

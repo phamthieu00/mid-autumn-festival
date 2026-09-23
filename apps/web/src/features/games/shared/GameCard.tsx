@@ -1,10 +1,19 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Trophy } from 'lucide-react'
+import { Crown, Trophy } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import type { LeaderboardResponse } from '@maf/shared/api'
+import { api } from '@/lib/api'
 import { useT } from '@/i18n'
 import { useHighScores } from '@/features/scores/useHighScores'
 import { Badge } from '@/components/ui/Badge'
 import type { GameMeta } from './registry'
+
+type Summary = {
+  period: string
+  leaders: Record<string, LeaderboardResponse['entries'][number] | null>
+}
+export const summaryQueryKey = ['leaderboards', 'summary'] as const
 
 export function GameCard({
   game,
@@ -18,6 +27,13 @@ export function GameCard({
   const { t } = useT()
   const scores = useHighScores()
   const best = scores[game.id]
+  const summary = useQuery({
+    queryKey: summaryQueryKey,
+    queryFn: () => api<Summary>('/leaderboards/summary'),
+    staleTime: 60_000,
+    enabled: showBest,
+  })
+  const leader = summary.data?.leaders[game.id] ?? null
 
   return (
     <motion.div
@@ -56,6 +72,18 @@ export function GameCard({
               </span>
             )}
           </div>
+          {showBest && leader && (
+            <div
+              className="text-gold-300/90 mt-2 flex items-center gap-1 truncate text-xs"
+              title={t('games.hub.leader')}
+            >
+              <Crown className="size-3.5 shrink-0" />
+              <span className="truncate">{leader.nickname ?? t('wishes.anonymous')}</span>
+              <span className="text-cream/50 shrink-0">
+                · {leader.value} {t(game.unitKey)}
+              </span>
+            </div>
+          )}
         </div>
       </Link>
     </motion.div>

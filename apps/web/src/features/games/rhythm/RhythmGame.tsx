@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Flame } from 'lucide-react'
+import { generateChart } from '@maf/shared/games/rhythm/chart'
+import { BEAT, LANE_KEYS, SCHEDULE_AHEAD } from '@maf/shared/games/rhythm/constants'
+import { advance, applyHit, createState, multiplier } from '@maf/shared/games/rhythm/engine'
+import type { Lane, RhythmState } from '@maf/shared/games/rhythm/types'
 import { useT } from '@/i18n'
 import { useAudio } from '@/hooks/useAudio'
 import { scoresStore } from '@/features/scores/scoresStore'
@@ -9,19 +13,18 @@ import { HudStat } from '../shared/HudStat'
 import { useGameLoop } from '../shared/useGameLoop'
 import { celebrate } from '../shared/celebrate'
 import { gameById } from '../shared/registry'
-import { generateChart } from '@maf/shared/games/rhythm/chart'
-import { BEAT, LANE_KEYS, LEAD_IN, SCHEDULE_AHEAD } from '@maf/shared/games/rhythm/constants'
+import { useGameSession } from '../shared/useGameSession'
+import { ServerResultPanel } from '../shared/ServerResultPanel'
 import { LANE_SFX } from './laneSfx'
-import { advance, applyHit, createState, multiplier } from '@maf/shared/games/rhythm/engine'
 import { LanePads } from './LanePads'
 import { render } from './renderer'
-import type { Lane, RhythmState } from '@maf/shared/games/rhythm/types'
 
 const GAME = gameById('rhythm')
 
 export default function RhythmGame() {
   const { t } = useT()
   const { playSfx, scheduleSfx, getTime } = useAudio()
+  const session = useGameSession('rhythm')
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const stateRef = useRef<RhythmState>(createState(generateChart(1)))
@@ -76,12 +79,15 @@ export default function RhythmGame() {
     setResult({ score: s.score, isRecord, prev, counts: s.counts, maxCombo: s.maxCombo })
     playSfx('win')
     if (isRecord && s.score > 0) celebrate(true)
-  }, [playSfx])
+    const judgements = s.chart.notes.map((n) =>
+      n.judged === 'perfect' ? 2 : n.judged === 'good' ? 1 : 0,
+    )
+    void session.finish({ judgements })
+  }, [playSfx, session])
 
   useGameLoop((dt) => {
     const s = stateRef.current
     const now = songTime()
-    // schedule the drum track ahead of time on the audio clock
     const notes = s.chart.notes
     while (
       schedIdx.current < notes.length &&
@@ -102,8 +108,16 @@ export default function RhythmGame() {
     if (s.finished) finish()
   }, status === 'running')
 
-  const start = () => {
-    stateRef.current = createState(generateChart(Math.floor(Math.random() * 1e6)))
+  const start = async () => {
+    setStatus('starting')
+    const outcome = await session.start()
+    if (outcome.kind === 'blocked') {
+      setStatus('idle')
+      return
+    }
+    const seed =
+      outcome.kind === 'online' ? outcome.session.seed : Math.floor(Math.random() * 1e6) + 1
+    stateRef.current = createState(generateChart(seed))
     schedIdx.current = 0
     setResult(null)
     setHud({ score: 0, combo: 0 })
@@ -156,16 +170,20 @@ export default function RhythmGame() {
   }, [status, hit, pause])
 
   const mult = multiplier(hud.combo)
-  void LEAD_IN
+  const shareUrl = session.result
+    ? `${window.location.origin}/r/${session.result.publicId}`
+    : undefined
 
   return (
     <>
       <GameShell
         game={GAME}
         status={status}
-        onStart={start}
+        onStart={() => void start()}
         onPause={pause}
         onResume={resume}
+        mode={session.mode}
+        onModeChange={session.setMode}
         areaClassName="flex h-[min(72dvh,680px)] min-h-[440px] flex-col"
         hud={
           <>
@@ -200,8 +218,11 @@ export default function RhythmGame() {
             ? `${labels.perfect} ${result.counts.perfect} · ${labels.good} ${result.counts.good} · ${labels.miss} ${result.counts.miss} · ${t('games.rhythm.maxCombo')} ${result.maxCombo}`
             : undefined
         }
-        onReplay={start}
-      />
+        onReplay={() => void start()}
+        shareUrl={shareUrl}
+      >
+        <ServerResultPanel session={session} gameId="rhythm" unit={t('games.rhythm.unit')} />
+      </GameOverModal>
     </>
   )
 }

@@ -19,6 +19,7 @@ export function GameOverModal({
   extra,
   onReplay,
   shareText,
+  shareUrl,
   children,
 }: {
   open: boolean
@@ -32,6 +33,7 @@ export function GameOverModal({
   extra?: string
   onReplay: () => void
   shareText?: string
+  shareUrl?: string
   children?: ReactNode
 }) {
   const { t } = useT()
@@ -48,7 +50,6 @@ export function GameOverModal({
         {score} <span className="text-cream/70 text-2xl">{unit}</span>
       </p>
       {extra && <p className="text-cream/70 mt-1 text-sm">{extra}</p>}
-      {children}
       {isRecord ? (
         <p className="animate-pop bg-gold-500/15 text-gold-300 mt-3 inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-bold">
           <Trophy className="size-4" /> {t('common.newRecord')}
@@ -60,6 +61,7 @@ export function GameOverModal({
           </p>
         )
       )}
+      {children}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Button onClick={onReplay} size="lg">
           <RotateCcw className="size-5" />
@@ -67,6 +69,7 @@ export function GameOverModal({
         </Button>
         <ShareButton
           size="lg"
+          url={shareUrl}
           text={
             shareText ??
             t('games.shared.shareText', { score: `${score} ${unit}`, game: t(game.titleKey) })

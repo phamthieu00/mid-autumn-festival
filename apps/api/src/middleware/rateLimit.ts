@@ -3,6 +3,7 @@ import { redis, redisReady } from '../redis'
 import { logger } from '../logger'
 import { ApiError } from './error'
 import { clientIp } from './ip'
+import { metrics } from '../metrics'
 
 const LUA = `
 local c = redis.call('INCR', KEYS[1])
@@ -67,6 +68,7 @@ export function rateLimit(opts: RateLimitOptions) {
       ttl = ri.ttlMs
     }
     if (over) {
+      metrics.rateLimited.inc({ scope: opts.scope })
       c.header('Retry-After', String(Math.max(1, Math.ceil(ttl / 1000))))
       throw new ApiError(429, 'RATE_LIMITED', 'Too many requests')
     }

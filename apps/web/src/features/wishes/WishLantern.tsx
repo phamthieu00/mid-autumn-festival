@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { Flag } from 'lucide-react'
 import { LanternIcon } from '@/components/ui/LanternIcon'
 import { LANTERN_COLORS } from '@/components/ui/lanternColors'
 import { useT } from '@/i18n'
@@ -10,15 +10,18 @@ export function WishLantern({
   wish,
   index,
   highlight = false,
-  onRemove,
+  pending = false,
+  onReport,
 }: {
   wish: Wish
   index: number
   highlight?: boolean
-  onRemove?: (id: string) => void
+  pending?: boolean
+  onReport?: (id: string) => void
 }) {
   const { t } = useT()
   const [open, setOpen] = useState(highlight)
+  const [reported, setReported] = useState(false)
 
   const seed = wish.id.split('').reduce((a, ch) => a + ch.charCodeAt(0), index * 17)
   const left = 4 + (seed % 88)
@@ -34,7 +37,7 @@ export function WishLantern({
       style={{ left: `${left}%`, animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
     >
       <div
-        className={cn('animate-sway relative', highlight && 'animate-pop')}
+        className={cn('animate-sway relative', highlight && 'animate-pop', pending && 'opacity-60')}
         style={{ animationDelay: `${(seed % 5) * 0.4}s` }}
       >
         {highlight && (
@@ -69,15 +72,24 @@ export function WishLantern({
           <p className="leading-snug">{wish.text}</p>
           <div className="text-cream/50 mt-2 flex items-center justify-between text-[10px]">
             <span>— {wish.name || t('wishes.anonymous')}</span>
-            {onRemove && (
-              <button
-                type="button"
-                onClick={() => onRemove(wish.id)}
-                aria-label={t('wishes.remove')}
-                className="hover:text-lantern-400 rounded p-0.5"
-              >
-                <X className="size-3" />
-              </button>
+            {pending ? (
+              <span className="text-lantern-300">{t('wishes.pendingLabel')}</span>
+            ) : (
+              onReport && (
+                <button
+                  type="button"
+                  disabled={reported}
+                  onClick={() => {
+                    setReported(true)
+                    onReport(wish.id)
+                  }}
+                  aria-label={t('wishes.report')}
+                  title={t('wishes.report')}
+                  className="hover:text-lantern-400 rounded p-0.5 disabled:opacity-50"
+                >
+                  <Flag className="size-3" />
+                </button>
+              )
             )}
           </div>
         </div>

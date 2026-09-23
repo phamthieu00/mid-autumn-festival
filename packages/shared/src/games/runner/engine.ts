@@ -41,6 +41,7 @@ export function createState(w: number, h: number): RunnerState {
     nextSpawnX: w + 150,
     nextId: 1,
     collected: 0,
+    pickupCounts: { mooncake: 0, star: 0 },
     collectPoints: 0,
     particles: [],
     popups: [],
@@ -217,6 +218,7 @@ export function update(s: RunnerState, dt: number, rng: () => number): RunnerEve
       k.taken = true
       const pts = PICKUPS[k.kind].points
       s.collected++
+      s.pickupCounts[k.kind]++
       s.collectPoints += pts
       events.push({ type: 'pickup', kind: k.kind, points: pts, x: sx, y: k.y })
       const color = k.kind === 'star' ? '#ffd166' : '#ff8c42'
