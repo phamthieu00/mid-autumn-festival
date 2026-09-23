@@ -1,3 +1,14 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @maf/web build",
+  "outputDirectory": "apps/web/dist",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- apps/web packages/shared vercel.json pnpm-lock.yaml package.json",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
