@@ -7,6 +7,16 @@ cập nhật realtime. Song ngữ Việt / Anh.
 
 **Demo:** https://mid-autumn-festival-murex.vercel.app
 
+## Ảnh chụp màn hình
+
+**Trang chủ** — đêm trăng, lồng đèn bay và đếm ngược tới rằm tháng Tám
+
+![Trang chủ: tiêu đề "Trung Thu Ngọt Ngào", trăng tròn và đồng hồ đếm ngược](apps/web/public/images/screenshot-home.png)
+
+**Trò chơi** — bảy mini-game chia hai nhóm Vận động / Trí tuệ, kèm kỷ lục cá nhân
+
+![Trang trò chơi: các thẻ Bắt lồng đèn, Rước đèn đêm trăng, Nhịp trống múa lân, Ghép bánh, Ghép hình mặt trăng, Đố vui, Đoán từ](apps/web/public/images/screenshot-games.png)
+
 ## Kiến trúc
 
 ```
