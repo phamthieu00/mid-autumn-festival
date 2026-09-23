@@ -6,7 +6,10 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 15_000,
       retry: (count, err) =>
-        err instanceof ApiError && err.status >= 400 && err.status < 500 ? false : count < 2,
+        err instanceof ApiError &&
+        ((err.status >= 400 && err.status < 500) || err.code === 'NOT_CONFIGURED')
+          ? false
+          : count < 2,
       refetchOnWindowFocus: false,
     },
   },

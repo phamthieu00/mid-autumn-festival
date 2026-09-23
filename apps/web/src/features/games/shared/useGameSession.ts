@@ -79,7 +79,9 @@ export function useGameSession(gameId: GameId): GameSession {
           return { kind: 'blocked', error: e }
         }
         setState('offline')
-        toast(t('auth.offline'), 'warn')
+        // no API behind this origin: play locally without nagging on every start
+        if (!(err instanceof ApiError && err.code === 'NOT_CONFIGURED'))
+          toast(t('auth.offline'), 'warn')
         return { kind: 'offline' }
       }
     },
@@ -120,7 +122,7 @@ export function useGameSession(gameId: GameId): GameSession {
         setError(e)
         setState(e.isNetwork ? 'offline' : 'idle')
         if (e.code === 'REJECTED') toast(t('games.shared.rejected', { reason: e.message }), 'warn')
-        else if (e.isNetwork) toast(t('auth.offline'), 'warn')
+        else if (e.isNetwork && e.code !== 'NOT_CONFIGURED') toast(t('auth.offline'), 'warn')
         return null
       } finally {
         currentRef.current = null
